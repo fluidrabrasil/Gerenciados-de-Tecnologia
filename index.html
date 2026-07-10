@@ -608,6 +608,52 @@ function persist() {
   localStorage.setItem("fluidra_tasks_v2", JSON.stringify(S.tasks));
   localStorage.setItem("fluidra_atas_v1", JSON.stringify(S.atas));
   if(S.execProjectOrder.length) localStorage.setItem("fluidra_exec_order_v1", JSON.stringify(S.execProjectOrder));
+  localStorage.setItem('fluidra_discovery_v1', JSON.stringify(S.discovery));
+  syncToSharePoint();
+}
+
+// ─── POWER AUTOMATE / SHAREPOINT SYNC ────────────────────────────────────────
+const READ_URL = 'https://default07e1122d06584d8da36096ab734956.ca.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/04/workflows/fe3b63c2508740208664afdd46f10077/triggers/manual/paths/invoke?api-version=1';
+const WRITE_URL = 'https://default07e1122d06584d8da36096ab734956.ca.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/27/workflows/868103563bc648d79ca49eeecb5d1195/triggers/manual/paths/invoke?api-version=1';
+
+function serializeAll() {
+  return {
+    tasks: S.tasks,
+    atas: S.atas,
+    execProjectOrder: S.execProjectOrder,
+    discovery: S.discovery,
+    invLive: INV_LIVE,
+    compras: loadCompras()
+  };
+}
+
+async function syncToSharePoint() {
+  try {
+    await fetch(WRITE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(serializeAll())
+    });
+  } catch(e) {
+    console.warn('[GTI] Falha ao sincronizar com SharePoint:', e);
+  }
+}
+
+async function loadFromSharePoint() {
+  try {
+    const resp = await fetch(READ_URL, { method: 'POST' });
+    if (!resp.ok) return;
+    const data = await resp.json();
+    if (data.tasks) { S.tasks = data.tasks; localStorage.setItem('fluidra_tasks_v2', JSON.stringify(data.tasks)); }
+    if (data.atas) { S.atas = data.atas; localStorage.setItem('fluidra_atas_v1', JSON.stringify(data.atas)); }
+    if (data.execProjectOrder) { S.execProjectOrder = data.execProjectOrder; localStorage.setItem('fluidra_exec_order_v1', JSON.stringify(data.execProjectOrder)); }
+    if (data.discovery) { S.discovery = data.discovery; localStorage.setItem('fluidra_discovery_v1', JSON.stringify(data.discovery)); }
+    if (data.invLive) { INV_LIVE = data.invLive; localStorage.setItem('fluidra_inv_live_v1', JSON.stringify(data.invLive)); }
+    if (data.compras) { saveCompras(data.compras, true); }
+    render();
+  } catch(e) {
+    console.warn('[GTI] Falha ao carregar dados do SharePoint:', e);
+  }
 }
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
@@ -1657,6 +1703,7 @@ document.getElementById("mp-task-input").addEventListener("keydown",e=>{if(e.key
 // ─── BOOT ─────────────────────────────────────────────────────────────────────
 loadState();
 render();
+loadFromSharePoint();
 
 // ── INVENTORY PAGE ──────────────────────────────────────────────────────────
 
@@ -1698,6 +1745,7 @@ function saveInvEdits() {
   }
   const json = JSON.stringify(INV_LIVE);
   localStorage.setItem('fluidra_inv_live_v1', json);
+  syncToSharePoint();
   // Verify save
   const verified = localStorage.getItem('fluidra_inv_live_v1');
   if (!verified) { alert('Erro ao salvar! Tente novamente.'); return; }
@@ -2197,7 +2245,7 @@ let _compPendingFile = null;
 function loadCompras() {
   try { return JSON.parse(localStorage.getItem(COMP_KEY) || '[]'); } catch(e) { return []; }
 }
-function saveCompras(arr) { localStorage.setItem(COMP_KEY, JSON.stringify(arr)); }
+function saveCompras(arr, _skipSync=false) { localStorage.setItem(COMP_KEY, JSON.stringify(arr)); if(!_skipSync) syncToSharePoint(); }
 function compId() { return 'c' + Date.now() + Math.random().toString(36).slice(2,7); }
 
 function goCompras() { S.page="compras"; S.comprasView="kanban"; S.comprasModal=null; render(); }
