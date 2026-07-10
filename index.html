@@ -1704,6 +1704,12 @@ document.getElementById("mp-task-input").addEventListener("keydown",e=>{if(e.key
 loadState();
 render();
 loadFromSharePoint();
+// Sincronização automática a cada 30 segundos
+setInterval(() => {
+  // Não atualiza se houver modal aberto (evita interromper o usuário)
+  const modalAberto = document.querySelector('.modal-overlay[style*="flex"]');
+  if (!modalAberto) loadFromSharePoint();
+}, 30000);
 
 // ── INVENTORY PAGE ──────────────────────────────────────────────────────────
 
