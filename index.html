@@ -2937,6 +2937,10 @@ function meudiaEventBRTDate(dtStr) {
   const dt = meudiaDateFromUTC(dtStr);
   return dt.toLocaleDateString('en-CA', {timeZone:'America/Sao_Paulo'});
 }
+function meudiaGetDT(val) {
+  // PA Outlook connector returns start/end as string; M365 returns {dateTime, timeZone}
+  return typeof val === 'string' ? val : (val && val.dateTime ? val.dateTime : null);
+}
 
 function meudiaGetWeekStart(dateStr) {
   const d = new Date(dateStr + 'T12:00:00');
@@ -2950,8 +2954,9 @@ function meudiaGetWeekStart(dateStr) {
 function meudiaEventsForDate(dateStr) {
   const personal = S.meudiaItems.filter(x => x.date === dateStr);
   const outlook = S.meudiaOutlookEvents.filter(ev => {
-    if (!ev.start || !ev.start.dateTime) return false;
-    return meudiaEventBRTDate(ev.start.dateTime) === dateStr;
+    const _startDT = meudiaGetDT(ev.start);
+    if (!_startDT) return false;
+    return meudiaEventBRTDate(_startDT) === dateStr;
   });
   return {personal, outlook};
 }
@@ -3180,9 +3185,9 @@ function renderMeuDiaDayView() {
   let eventsHtml = '';
 
   // Outlook events (timed)
-  outlook.filter(e=>!e.isAllDay&&e.start&&e.start.dateTime).forEach(ev => {
-    const st = meudiaEventBRTTime(ev.start.dateTime);
-    const et = meudiaEventBRTTime(ev.end.dateTime);
+  outlook.filter(e=>!e.isAllDay&&meudiaGetDT(e.start)).forEach(ev => {
+    const st = meudiaEventBRTTime(meudiaGetDT(ev.start));
+    const et = meudiaEventBRTTime(meudiaGetDT(ev.end));
     const [sh, sm] = st.split(':').map(n=>parseInt(n)||0);
     const [eh, em] = et.split(':').map(n=>parseInt(n)||0);
     const startH = sh + sm/60;
@@ -3237,8 +3242,8 @@ function renderMeuDiaWeekView() {
     const dateStr = d.toISOString().split('T')[0];
     const isToday = dateStr === todayStr;
     const {personal, outlook} = meudiaEventsForDate(dateStr);
-    const sortedOutlook = [...outlook].filter(e=>e.start&&e.start.dateTime&&!e.isAllDay)
-      .map(e=>({type:'outlook',label:`${meudiaEventBRTTime(e.start.dateTime)} ${esc(e.subject||'')}`,webLink:e.webLink||'#'}));
+    const sortedOutlook = [...outlook].filter(e=>meudiaGetDT(e.start)&&!e.isAllDay)
+      .map(e=>({type:'outlook',label:`${meudiaEventBRTTime(meudiaGetDT(e.start))} ${esc(e.subject||'')}`,webLink:e.webLink||'#'}));
     const sortedPersonal = [...personal].map(e=>({type:'personal',label:`${e.time?e.time+' ':''}${esc(e.title)}`,done:e.done,id:e.id}));
     const allEvs = [...sortedOutlook, ...sortedPersonal];
     const shown = allEvs.slice(0, 4);
