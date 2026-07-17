@@ -289,6 +289,87 @@ input,select,textarea{font-family:inherit;color:#001a70;}
 .inv-empty{text-align:center;padding:40px;color:#B0C8D8;font-size:14px;}
 .inv-divider{border-top:2px solid #e5e3dd;margin:32px 0 24px;}
 .inv-sub-section-title{font-size:13px;font-weight:700;color:#001a70;opacity:.7;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+
+/* ─── MEU DIA ─── */
+.meudia-wrap{padding:20px 28px 32px;}
+.meudia-nav{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.meudia-date-nav{display:flex;align-items:center;gap:6px;}
+.meudia-date-btn{width:32px;height:32px;border-radius:6px;border:1.5px solid #C5D8E8;background:#fff;color:#001a70;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.meudia-date-btn:hover{background:#E0EBF5;}
+.meudia-date-label{font-size:14px;font-weight:700;color:#001a70;min-width:200px;text-align:center;}
+.meudia-today-btn{padding:5px 12px;border-radius:6px;border:1.5px solid #8393ff;background:#fff;color:#8393ff;font-size:12px;font-weight:700;cursor:pointer;}
+.meudia-today-btn:hover{background:#f0f2ff;}
+.meudia-add-btn{margin-left:auto;padding:7px 16px;border-radius:8px;border:none;background:#001a70;color:#fff;font-size:13px;font-weight:700;cursor:pointer;}
+.meudia-add-btn:hover{background:#002855;}
+.meudia-no-time{background:#fff;border-radius:10px;border:1.5px solid #E0EBF5;padding:12px 16px;margin-bottom:14px;box-shadow:0 1px 6px rgba(0,26,112,.06);}
+.meudia-no-time-title{font-size:11px;font-weight:700;color:#7A9BB5;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.meudia-no-time-items{display:flex;flex-direction:column;gap:6px;}
+.meudia-quick-item{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#F7FAFD;border-radius:7px;border:1px solid #E0EBF5;}
+.meudia-quick-item.done .meudia-item-title{text-decoration:line-through;color:#B0C8D8;}
+.meudia-item-checkbox{width:16px;height:16px;border-radius:4px;border:2px solid #C5D8E8;background:#fff;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;}
+.meudia-item-checkbox.checked{background:#27AE60;border-color:#27AE60;color:#fff;}
+.meudia-item-title{font-size:13px;color:#001a70;font-weight:600;flex:1;}
+.meudia-item-proj{font-size:10px;background:#EAF4FF;color:#001a70;border-radius:4px;padding:1px 7px;font-weight:600;white-space:nowrap;}
+.meudia-item-del{background:none;border:none;color:#C0392B;font-size:14px;opacity:.4;padding:0 4px;cursor:pointer;}
+.meudia-item-del:hover{opacity:1;}
+.meudia-tl-grid{position:relative;background:#fff;border-radius:10px;border:1.5px solid #E0EBF5;overflow:hidden;box-shadow:0 1px 6px rgba(0,26,112,.06);}
+.meudia-tl-rows{position:relative;}
+.meudia-tl-row{display:flex;align-items:stretch;height:64px;border-bottom:1px solid #F0F5FA;cursor:pointer;}
+.meudia-tl-row:hover .meudia-tl-slot{background:#FAFCFF;}
+.meudia-tl-row:last-child{border-bottom:none;}
+.meudia-tl-hour{width:54px;flex-shrink:0;padding:8px 10px 0;font-size:11px;font-weight:600;color:#A0B8CC;text-align:right;border-right:1.5px solid #F0F5FA;}
+.meudia-tl-slot{flex:1;}
+.meudia-events-layer{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;}
+.meudia-event{position:absolute;border-radius:6px;padding:4px 8px;overflow:hidden;pointer-events:auto;cursor:pointer;}
+.meudia-event.outlook{background:#EAF4FF;border-left:3px solid #001a70;}
+.meudia-event.outlook:hover{background:#daeeff;}
+.meudia-event.personal{background:#f0f2ff;border-left:3px solid #8393ff;}
+.meudia-event.personal:hover{background:#e6e9ff;}
+.meudia-event.personal.done{background:#EDFAF3;border-left-color:#27AE60;opacity:.8;}
+.meudia-event-time{font-size:10px;font-weight:600;color:#7A9BB5;line-height:1.2;}
+.meudia-event-title{font-size:12px;font-weight:700;color:#001a70;line-height:1.3;}
+.meudia-event-loc{font-size:10px;color:#7A9BB5;margin-top:1px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.meudia-now-line{position:absolute;left:54px;right:0;height:2px;background:#F5A623;pointer-events:none;z-index:10;}
+.meudia-now-dot{position:absolute;left:-5px;top:-4px;width:10px;height:10px;border-radius:50%;background:#F5A623;}
+.meudia-week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;}
+.meudia-week-col{background:#fff;border-radius:10px;border:1.5px solid #E0EBF5;overflow:hidden;}
+.meudia-week-col.today{border-color:#8393ff;}
+.meudia-week-col-header{padding:8px 10px 6px;border-bottom:1px solid #E0EBF5;cursor:pointer;}
+.meudia-week-col-header:hover{background:#F7FAFD;}
+.meudia-week-dow{font-size:10px;font-weight:700;color:#7A9BB5;text-transform:uppercase;letter-spacing:.4px;}
+.meudia-week-day{font-size:18px;font-weight:800;color:#001a70;line-height:1.2;}
+.meudia-week-day.today-num{color:#8393ff;}
+.meudia-week-events{padding:5px 5px 4px;display:flex;flex-direction:column;gap:2px;min-height:50px;}
+.meudia-week-event{padding:2px 7px;border-radius:5px;font-size:11px;font-weight:600;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;cursor:pointer;}
+.meudia-week-event.outlook{background:#EAF4FF;color:#001a70;}
+.meudia-week-event.personal{background:#f0f2ff;color:#001a70;}
+.meudia-week-event.done{background:#EDFAF3;color:#27AE60;text-decoration:line-through;}
+.meudia-week-more{font-size:10px;color:#8393ff;font-weight:700;padding:1px 7px;cursor:pointer;}
+.meudia-week-add{width:100%;background:none;border:none;border-top:1px solid #F0F5FA;padding:5px;color:#8393ff;font-size:11px;font-weight:700;cursor:pointer;}
+.meudia-week-add:hover{background:#F7FAFD;}
+.meudia-month-wrap{background:#fff;border-radius:10px;border:1.5px solid #E0EBF5;overflow:hidden;box-shadow:0 1px 6px rgba(0,26,112,.06);}
+.meudia-month-header{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:2px solid #E0EBF5;}
+.meudia-month-dow{padding:10px;text-align:center;font-size:11px;font-weight:700;color:#7A9BB5;text-transform:uppercase;letter-spacing:.4px;}
+.meudia-month-grid{display:grid;grid-template-columns:repeat(7,1fr);}
+.meudia-month-cell{border-right:1px solid #F0F5FA;border-bottom:1px solid #F0F5FA;min-height:90px;padding:6px 8px;cursor:pointer;}
+.meudia-month-cell:nth-child(7n){border-right:none;}
+.meudia-month-cell:hover{background:#F7FAFD;}
+.meudia-month-cell.other-month{background:#F9FBFD;}
+.meudia-month-cell.today-cell{background:#F0F2FF;}
+.meudia-month-num{font-size:13px;font-weight:700;color:#001a70;width:24px;height:24px;display:flex;align-items:center;justify-content:center;border-radius:50%;margin-bottom:2px;}
+.meudia-month-num.today{background:#8393ff;color:#fff;}
+.meudia-month-cell.other-month .meudia-month-num{color:#C0D0DC;}
+.meudia-month-event{font-size:10px;font-weight:600;border-radius:3px;padding:1px 5px;margin-bottom:1px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.meudia-month-event.outlook{background:#EAF4FF;color:#001a70;}
+.meudia-month-event.personal{background:#f0f2ff;color:#001a70;}
+.meudia-month-event.done{background:#EDFAF3;color:#27AE60;text-decoration:line-through;}
+.meudia-month-more{font-size:9px;color:#8393ff;font-weight:700;}
+.meudia-outlook-bar{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#EAF4FF;border-radius:8px;border:1px solid #C5D8E8;margin-bottom:12px;font-size:12px;color:#001a70;}
+.meudia-outlook-dot{width:8px;height:8px;border-radius:50%;background:#27AE60;flex-shrink:0;}
+.meudia-outlook-dot.loading{background:#F5A623;animation:pulse .8s infinite alternate;}
+.meudia-outlook-dot.error{background:#C0392B;}
+@keyframes pulse{from{opacity:.5}to{opacity:1}}
+
 </style>
 </head>
 <body>
@@ -570,6 +651,13 @@ let S = {
   comprasModal: null,
   discovery: [],
   discoveryExpandedItems: new Set(),
+  // Meu Dia
+  meudiaView: "dia",
+  meudiaDate: new Date().toISOString().split('T')[0],
+  meudiaItems: [],
+  meudiaModal: null,
+  meudiaOutlookEvents: [],
+  meudiaOutlookStatus: "idle",
 };
 
 // ─── STORAGE ─────────────────────────────────────────────────────────────────
@@ -601,6 +689,8 @@ function loadState() {
   if(_eo){ try{ S.execProjectOrder=JSON.parse(_eo); }catch(e){} }
   const _disc = localStorage.getItem('fluidra_discovery_v1');
   if(_disc){ try{ S.discovery=JSON.parse(_disc); }catch(e){} }
+  const _md = localStorage.getItem('fluidra_meudia_v1');
+  if(_md){ try{ S.meudiaItems=JSON.parse(_md); }catch(e){} }
   S.loaded = true;
 }
 function persist() {
@@ -609,6 +699,7 @@ function persist() {
   localStorage.setItem("fluidra_atas_v1", JSON.stringify(S.atas));
   if(S.execProjectOrder.length) localStorage.setItem("fluidra_exec_order_v1", JSON.stringify(S.execProjectOrder));
   localStorage.setItem('fluidra_discovery_v1', JSON.stringify(S.discovery));
+  localStorage.setItem('fluidra_meudia_v1', JSON.stringify(S.meudiaItems));
   syncToSharePoint();
 }
 
@@ -623,7 +714,8 @@ function serializeAll() {
     execProjectOrder: S.execProjectOrder,
     discovery: S.discovery,
     invLive: INV_LIVE,
-    compras: loadCompras()
+    compras: loadCompras(),
+    meudiaItems: S.meudiaItems
   };
 }
 
@@ -650,6 +742,7 @@ async function loadFromSharePoint() {
     if (data.discovery) { S.discovery = data.discovery; localStorage.setItem('fluidra_discovery_v1', JSON.stringify(data.discovery)); }
     if (data.invLive) { INV_LIVE = data.invLive; localStorage.setItem('fluidra_inv_live_v1', JSON.stringify(data.invLive)); }
     if (data.compras) { saveCompras(data.compras, true); }
+    if (data.meudiaItems) { S.meudiaItems = data.meudiaItems; localStorage.setItem('fluidra_meudia_v1', JSON.stringify(data.meudiaItems)); }
     render();
   } catch(e) {
     console.warn('[GTI] Falha ao carregar dados do SharePoint:', e);
@@ -696,6 +789,8 @@ function render() {
     app.innerHTML = renderCompras();
   } else if(S.page==="discovery") {
     app.innerHTML = renderDiscovery();
+  } else if(S.page==="meudia") {
+    app.innerHTML = renderMeuDia();
   } else {
     app.innerHTML = renderMain();
   }
@@ -1384,6 +1479,10 @@ function renderHome() {
     // Placeholder slots — will be replaced by real modules later
     {id:"inventory",icon:"📋",banner:"linear-gradient(135deg,#001a70 0%,#121232 100%)",title:"Inventário Corporativo",desc:"Ativos de TI: workstations, mobile, servidores, impressoras, infraestrutura e acessos.",stats:`294+ ativos cadastrados`,action:()=>"goInventory()",actionLabel:"Acessar →",soon:false},
     {id:"compras",icon:"🛒",banner:"linear-gradient(135deg,#001a70 0%,#1a2f8a 100%)",title:"Compras T.I.",desc:"Gestão de compras de equipamentos — da necessidade à NF lançada no ERP.",stats:`<span id=\"comp-stat\">carregando...</span>`,action:()=>"goCompras()",actionLabel:"Acessar →",soon:false},
+    {id:"meudia",icon:"📅",banner:"linear-gradient(135deg,#5b6fd8 0%,#001a70 100%)",title:"Meu Dia",
+      desc:"Organize seu dia, semana e mês. Acompanhe reuniões do Outlook e adicione atividades vinculadas a projetos.",
+      stats:`${(()=>{const t=new Date().toISOString().split('T')[0];return S.meudiaItems.filter(x=>x.date===t&&!x.done).length})()} atividade(s) hoje`,
+      action:()=>"goMeuDia()",actionLabel:"Acessar →",soon:false},
   ];
 
   const cards = tools.map(t=>`
@@ -2615,6 +2714,7 @@ function renderComprasModal(modal,purchases) {
 
 // ── DISCOVERY ─────────────────────────────────────────────────────────────────
 function goDiscovery() { S.page="discovery"; render(); }
+function goMeuDia(){ S.page='meudia'; S.meudiaDate=new Date().toISOString().split('T')[0]; render(); meudiaFetchForCurrentView(); }
 
 function renderDiscovery() {
   const items = S.discovery;
@@ -2812,6 +2912,445 @@ function confirmConvert() {
   const newName = item.name;
   S.expandedProjects.add(newName);
   persist(); closeConvertModal(); render();
+}
+
+
+// ─── MEU DIA MODULE ──────────────────────────────────────────────────────────
+const OUTLOOK_URL = ''; // Preencha com a URL do fluxo GTI_Agenda após criá-lo no Power Automate
+
+function saveMeuDia() {
+  localStorage.setItem('fluidra_meudia_v1', JSON.stringify(S.meudiaItems));
+  syncToSharePoint();
+}
+
+function meudiaDateFromUTC(dtStr) {
+  // dtStr like "2026-07-17T11:00:00.0000000" — treat as UTC
+  return new Date(dtStr.replace(/\.\d+$/, '') + 'Z');
+}
+
+function meudiaEventBRTTime(dtStr) {
+  const dt = meudiaDateFromUTC(dtStr);
+  return dt.toLocaleTimeString('pt-BR', {timeZone:'America/Sao_Paulo', hour:'2-digit', minute:'2-digit', hour12:false});
+}
+
+function meudiaEventBRTDate(dtStr) {
+  const dt = meudiaDateFromUTC(dtStr);
+  return dt.toLocaleDateString('en-CA', {timeZone:'America/Sao_Paulo'});
+}
+
+function meudiaGetWeekStart(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  let dow = d.getDay(); // 0=Sun
+  dow = dow === 0 ? 6 : dow - 1; // Mon=0..Sun=6
+  const mon = new Date(d);
+  mon.setDate(d.getDate() - dow);
+  return mon.toISOString().split('T')[0];
+}
+
+function meudiaEventsForDate(dateStr) {
+  const personal = S.meudiaItems.filter(x => x.date === dateStr);
+  const outlook = S.meudiaOutlookEvents.filter(ev => {
+    if (!ev.start || !ev.start.dateTime) return false;
+    return meudiaEventBRTDate(ev.start.dateTime) === dateStr;
+  });
+  return {personal, outlook};
+}
+
+async function meudiaFetchForCurrentView() {
+  if (!OUTLOOK_URL) return;
+  let start = S.meudiaDate, end = S.meudiaDate;
+  if (S.meudiaView === 'semana') {
+    const ws = meudiaGetWeekStart(S.meudiaDate);
+    const we = new Date(ws + 'T12:00:00'); we.setDate(we.getDate() + 6);
+    start = ws; end = we.toISOString().split('T')[0];
+  } else if (S.meudiaView === 'mes') {
+    const [y, m] = S.meudiaDate.split('-').map(Number);
+    start = `${y}-${String(m).padStart(2,'0')}-01`;
+    const lastD = new Date(y, m, 0).getDate();
+    end = `${y}-${String(m).padStart(2,'0')}-${String(lastD).padStart(2,'0')}`;
+  }
+  S.meudiaOutlookStatus = 'loading';
+  render();
+  try {
+    const resp = await fetch(OUTLOOK_URL, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({start, end})
+    });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    S.meudiaOutlookEvents = Array.isArray(data) ? data : (data.value || []);
+    S.meudiaOutlookStatus = 'ok';
+  } catch(e) {
+    S.meudiaOutlookStatus = 'error';
+    console.warn('[GTI] Outlook fetch error:', e);
+  }
+  render();
+}
+
+function meudiaNavigate(delta) {
+  const d = new Date(S.meudiaDate + 'T12:00:00');
+  if (S.meudiaView === 'dia') d.setDate(d.getDate() + delta);
+  else if (S.meudiaView === 'semana') d.setDate(d.getDate() + delta * 7);
+  else d.setMonth(d.getMonth() + delta);
+  S.meudiaDate = d.toISOString().split('T')[0];
+  render(); meudiaFetchForCurrentView();
+}
+
+function meudiaGoToday() {
+  S.meudiaDate = new Date().toISOString().split('T')[0];
+  render(); meudiaFetchForCurrentView();
+}
+
+function meudiaSetView(v) {
+  S.meudiaView = v; render(); meudiaFetchForCurrentView();
+}
+
+function meudiaSelectDate(dateStr) {
+  S.meudiaDate = dateStr; S.meudiaView = 'dia';
+  render(); meudiaFetchForCurrentView();
+}
+
+function meudiaToggleItem(id) {
+  const item = S.meudiaItems.find(x => x.id === id);
+  if (item) { item.done = !item.done; saveMeuDia(); render(); }
+}
+
+function meudiaDeleteItem(id) {
+  if (!confirm('Remover esta atividade?')) return;
+  S.meudiaItems = S.meudiaItems.filter(x => x.id !== id);
+  saveMeuDia(); render();
+}
+
+function meudiaOpenAdd(date, time) {
+  S.meudiaModal = {date: date || S.meudiaDate, time: time||'', title:'', project:'', notes:''};
+  render();
+  setTimeout(() => { const el = document.getElementById('meudia-inp-title'); if(el) el.focus(); }, 50);
+}
+
+function meudiaCloseModal() { S.meudiaModal = null; render(); }
+
+function meudiaAddItem() {
+  const m = S.meudiaModal;
+  const titleEl = document.getElementById('meudia-inp-title');
+  const title = titleEl ? titleEl.value.trim() : (m && m.title ? m.title.trim() : '');
+  if (!title) { if(titleEl){titleEl.style.borderColor='#e74c3c'; titleEl.focus();} return; }
+  S.meudiaItems.push({
+    id: 'md_' + Date.now(),
+    title,
+    date: m.date,
+    time: m.time || null,
+    done: false,
+    project: m.project || null,
+    notes: m.notes || ''
+  });
+  // If task linked to a project, also add as a project task
+  if (m.project && m.addToProject) {
+    const now = Date.now();
+    S.tasks.push({id:now+'_md', title, description:'(via Meu Dia)', priority:'Média',
+      status:'Backlog', startDate:m.date, endDate:m.date, project:m.project, done:false, progress:0});
+    persist();
+  } else {
+    saveMeuDia();
+  }
+  S.meudiaModal = null;
+  render();
+}
+
+function renderMeuDia() {
+  const todayStr = new Date().toISOString().split('T')[0];
+  const views = [{key:'dia',label:'📅 Dia'},{key:'semana',label:'📆 Semana'},{key:'mes',label:'🗓 Mês'}];
+  const viewBtns = views.map(v=>`<button class="view-btn${S.meudiaView===v.key?' active':''}" onclick="meudiaSetView('${v.key}')">${v.label}</button>`).join('');
+
+  // Date label
+  let dateLabelStr = '';
+  if (S.meudiaView === 'dia') {
+    const d = new Date(S.meudiaDate + 'T12:00:00');
+    const isToday = S.meudiaDate === todayStr;
+    const label = d.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
+    dateLabelStr = isToday ? 'Hoje — ' + label : label;
+  } else if (S.meudiaView === 'semana') {
+    const ws = meudiaGetWeekStart(S.meudiaDate);
+    const we = new Date(ws + 'T12:00:00'); we.setDate(we.getDate() + 6);
+    dateLabelStr = new Date(ws+'T12:00:00').toLocaleDateString('pt-BR',{day:'numeric',month:'short'})
+      + ' – ' + we.toLocaleDateString('pt-BR',{day:'numeric',month:'short',year:'numeric'});
+  } else {
+    const d = new Date(S.meudiaDate.slice(0,7) + '-01T12:00:00');
+    const s = d.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+    dateLabelStr = s.charAt(0).toUpperCase() + s.slice(1);
+  }
+
+  // Outlook status bar
+  let outlookBar = '';
+  if (!OUTLOOK_URL) {
+    outlookBar = `<div class="meudia-outlook-bar" style="background:#FFF8EC;border-color:#F5A623;">
+      <span>⚙️</span>
+      <span style="flex:1;">Reuniões do Outlook desativadas — <a href="#" onclick="event.preventDefault();alert('Para ativar: crie o fluxo GTI_Agenda no Power Automate e preencha a constante OUTLOOK_URL no HTML.')" style="color:#8393ff;font-weight:700;">Como ativar →</a></span>
+    </div>`;
+  } else if (S.meudiaOutlookStatus === 'loading') {
+    outlookBar = `<div class="meudia-outlook-bar"><div class="meudia-outlook-dot loading"></div><span>Carregando reuniões do Outlook...</span></div>`;
+  } else if (S.meudiaOutlookStatus === 'ok') {
+    outlookBar = `<div class="meudia-outlook-bar"><div class="meudia-outlook-dot"></div><span>${S.meudiaOutlookEvents.length} reunião(ões) carregada(s) do Outlook</span></div>`;
+  } else if (S.meudiaOutlookStatus === 'error') {
+    outlookBar = `<div class="meudia-outlook-bar" style="background:#FDE8E8;border-color:#C0392B;"><div class="meudia-outlook-dot error"></div><span>Erro ao buscar Outlook. <button onclick="meudiaFetchForCurrentView()" style="background:none;border:none;color:#C0392B;font-weight:700;cursor:pointer;font-family:inherit;font-size:12px;text-decoration:underline;">Tentar novamente</button></span></div>`;
+  }
+
+  let mainContent = '';
+  if (S.meudiaView === 'dia') mainContent = renderMeuDiaDayView();
+  else if (S.meudiaView === 'semana') mainContent = renderMeuDiaWeekView();
+  else mainContent = renderMeuDiaMonthView();
+
+  return `
+  <div id="header" style="background:#001a70;height:56px;padding:0 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;">
+    <div class="hd-left">
+      <button class="hd-back" onclick="goHome()">← Início</button>
+      <div class="hd-divider"></div>
+      <span class="hd-title">Fluidra</span><span class="hd-sub">/ Meu Dia</span>
+    </div>
+  </div>
+  <div class="meudia-wrap">
+    <div class="meudia-nav">
+      <div class="view-group">${viewBtns}</div>
+      <div class="meudia-date-nav">
+        <button class="meudia-date-btn" onclick="meudiaNavigate(-1)">‹</button>
+        <span class="meudia-date-label">${dateLabelStr}</span>
+        <button class="meudia-date-btn" onclick="meudiaNavigate(1)">›</button>
+      </div>
+      <button class="meudia-today-btn" onclick="meudiaGoToday()">Hoje</button>
+      <button class="meudia-add-btn" onclick="meudiaOpenAdd()">+ Adicionar</button>
+    </div>
+    ${outlookBar}
+    ${mainContent}
+  </div>
+  ${renderMeuDiaModal()}`;
+}
+
+function renderMeuDiaDayView() {
+  const {personal, outlook} = meudiaEventsForDate(S.meudiaDate);
+  const noTime = personal.filter(x => !x.time);
+  const withTime = personal.filter(x => x.time);
+  const HOUR_START = 7, HOUR_END = 22, SLOT_H = 64;
+  const totalH = (HOUR_END - HOUR_START) * SLOT_H;
+
+  // No-time section
+  let noTimeHtml = '';
+  if (noTime.length > 0 || outlook.filter(e=>e.isAllDay).length > 0) {
+    const allDayItems = [
+      ...outlook.filter(e=>e.isAllDay).map(e=>`
+        <div class="meudia-quick-item">
+          <span style="font-size:12px;">📅</span>
+          <span class="meudia-item-title">${esc(e.subject||'')}</span>
+          <span class="meudia-item-proj">Dia inteiro</span>
+        </div>`),
+      ...noTime.map(item=>`
+        <div class="meudia-quick-item${item.done?' done':''}">
+          <div class="meudia-item-checkbox${item.done?' checked':''}" onclick="meudiaToggleItem('${item.id}')">${item.done?'✓':''}</div>
+          <span class="meudia-item-title">${esc(item.title)}</span>
+          ${item.project?`<span class="meudia-item-proj">${esc(item.project)}</span>`:''}
+          <button class="meudia-item-del" onclick="meudiaDeleteItem('${item.id}')" title="Remover">✕</button>
+        </div>`)
+    ].join('');
+    noTimeHtml = `<div class="meudia-no-time">
+      <div class="meudia-no-time-title">Sem horário definido</div>
+      <div class="meudia-no-time-items">${allDayItems}</div>
+      <button onclick="meudiaOpenAdd('${S.meudiaDate}','')" style="margin-top:8px;background:none;border:1.5px dashed #C5D8E8;border-radius:6px;padding:4px 14px;color:#8393ff;font-size:12px;font-weight:600;cursor:pointer;width:100%;">+ Adicionar sem horário</button>
+    </div>`;
+  }
+
+  // Now line
+  const nowStr = new Date().toLocaleTimeString('pt-BR',{timeZone:'America/Sao_Paulo',hour:'2-digit',minute:'2-digit',hour12:false});
+  const [nowH, nowM] = nowStr.split(':').map(n=>parseInt(n)||0);
+  const todayStr = new Date().toISOString().split('T')[0];
+  let nowLineHtml = '';
+  if (S.meudiaDate === todayStr && nowH >= HOUR_START && nowH < HOUR_END) {
+    const nowY = (nowH - HOUR_START) * SLOT_H + (nowM / 60) * SLOT_H;
+    nowLineHtml = `<div class="meudia-now-line" style="top:${nowY}px;"><div class="meudia-now-dot"></div></div>`;
+  }
+
+  // Build hour rows
+  let rows = '';
+  for (let h = HOUR_START; h < HOUR_END; h++) {
+    const label = h.toString().padStart(2,'0') + ':00';
+    rows += `<div class="meudia-tl-row" onclick="meudiaOpenAdd('${S.meudiaDate}','${label}')">
+      <div class="meudia-tl-hour">${label}</div>
+      <div class="meudia-tl-slot"></div>
+    </div>`;
+  }
+
+  // Build events
+  let eventsHtml = '';
+
+  // Outlook events (timed)
+  outlook.filter(e=>!e.isAllDay&&e.start&&e.start.dateTime).forEach(ev => {
+    const st = meudiaEventBRTTime(ev.start.dateTime);
+    const et = meudiaEventBRTTime(ev.end.dateTime);
+    const [sh, sm] = st.split(':').map(n=>parseInt(n)||0);
+    const [eh, em] = et.split(':').map(n=>parseInt(n)||0);
+    const startH = sh + sm/60;
+    const endH = eh + em/60;
+    if (startH >= HOUR_END || endH <= HOUR_START) return;
+    const top = Math.max(0, (startH - HOUR_START)) * SLOT_H;
+    const height = Math.max(28, (Math.min(endH, HOUR_END) - Math.max(startH, HOUR_START)) * SLOT_H) - 4;
+    const locHtml = ev.location ? `<div class="meudia-event-loc">📍 ${esc(ev.location)}</div>` : '';
+    eventsHtml += `<div class="meudia-event outlook" style="top:${top+2}px;height:${height}px;left:62px;right:8px;"
+        onclick="window.open('${ev.webLink||'#'}','_blank')" title="${esc(ev.subject||'')}">
+      <div class="meudia-event-time">${st} – ${et}</div>
+      <div class="meudia-event-title">${esc(ev.subject||'')}</div>
+      ${locHtml}
+    </div>`;
+  });
+
+  // Personal timed items
+  withTime.forEach(item => {
+    const [sh, sm] = item.time.split(':').map(n=>parseInt(n)||0);
+    const startH = sh + sm/60;
+    if (startH >= HOUR_END || startH < HOUR_START) return;
+    const top = (startH - HOUR_START) * SLOT_H;
+    eventsHtml += `<div class="meudia-event personal${item.done?' done':''}" style="top:${top+2}px;height:50px;left:62px;right:8px;">
+      <div style="display:flex;align-items:center;gap:5px;">
+        <div class="meudia-item-checkbox${item.done?' checked':''}" onclick="meudiaToggleItem('${item.id}')" style="pointer-events:auto;">${item.done?'✓':''}</div>
+        <div>
+          <div class="meudia-event-time">${item.time}${item.project?' · '+esc(item.project):''}</div>
+          <div class="meudia-event-title">${esc(item.title)}</div>
+        </div>
+        <button class="meudia-item-del" onclick="meudiaDeleteItem('${item.id}')" style="margin-left:auto;font-size:12px;pointer-events:auto;">✕</button>
+      </div>
+    </div>`;
+  });
+
+  return `${noTimeHtml}
+    <div class="meudia-tl-grid">
+      <div class="meudia-tl-rows">${rows}</div>
+      <div class="meudia-events-layer">
+        ${eventsHtml}
+        ${nowLineHtml}
+      </div>
+    </div>`;
+}
+
+function renderMeuDiaWeekView() {
+  const ws = meudiaGetWeekStart(S.meudiaDate);
+  const todayStr = new Date().toISOString().split('T')[0];
+  const DOWS = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+  let cols = '';
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(ws + 'T12:00:00'); d.setDate(d.getDate() + i);
+    const dateStr = d.toISOString().split('T')[0];
+    const isToday = dateStr === todayStr;
+    const {personal, outlook} = meudiaEventsForDate(dateStr);
+    const sortedOutlook = [...outlook].filter(e=>e.start&&e.start.dateTime&&!e.isAllDay)
+      .map(e=>({type:'outlook',label:`${meudiaEventBRTTime(e.start.dateTime)} ${esc(e.subject||'')}`,webLink:e.webLink||'#'}));
+    const sortedPersonal = [...personal].map(e=>({type:'personal',label:`${e.time?e.time+' ':''}${esc(e.title)}`,done:e.done,id:e.id}));
+    const allEvs = [...sortedOutlook, ...sortedPersonal];
+    const shown = allEvs.slice(0, 4);
+    const more = allEvs.length - 4;
+    const evHtml = shown.map(e=>`<div class="meudia-week-event ${e.type}${e.done?' done':''}"
+        onclick="${e.type==='outlook'?`window.open('${e.webLink}','_blank')`:`meudiaToggleItem('${e.id}')`}"
+        title="${e.label}">${e.label}</div>`).join('');
+    cols += `<div class="meudia-week-col${isToday?' today':''}">
+      <div class="meudia-week-col-header" onclick="meudiaSelectDate('${dateStr}')">
+        <div class="meudia-week-dow">${DOWS[i]}</div>
+        <div class="meudia-week-day${isToday?' today-num':''}">${d.getDate()}</div>
+      </div>
+      <div class="meudia-week-events">
+        ${evHtml}
+        ${more>0?`<div class="meudia-week-more" onclick="meudiaSelectDate('${dateStr}')">+${more} mais</div>`:''}
+        ${!allEvs.length?`<div style="font-size:11px;color:#C5D8E8;padding:3px 7px;">Livre</div>`:''}
+      </div>
+      <button class="meudia-week-add" onclick="meudiaOpenAdd('${dateStr}','')">+ Adicionar</button>
+    </div>`;
+  }
+  return `<div class="meudia-week-grid">${cols}</div>`;
+}
+
+function renderMeuDiaMonthView() {
+  const todayStr = new Date().toISOString().split('T')[0];
+  const [year, month] = S.meudiaDate.split('-').map(Number);
+  const firstDay = new Date(year, month-1, 1);
+  let startDow = firstDay.getDay();
+  startDow = startDow === 0 ? 6 : startDow - 1; // Mon=0
+  const lastDay = new Date(year, month, 0).getDate();
+  const DOWS = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+  const headerHtml = DOWS.map(d=>`<div class="meudia-month-dow">${d}</div>`).join('');
+  let cells = '';
+  // Prev month fill
+  const prevM = month===1?12:month-1, prevY = month===1?year-1:year;
+  const prevLastDay = new Date(prevY, prevM, 0).getDate();
+  for (let i=0;i<startDow;i++) {
+    const d = prevLastDay - startDow + 1 + i;
+    const ds = `${prevY}-${String(prevM).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    cells += `<div class="meudia-month-cell other-month" onclick="meudiaSelectDate('${ds}')"><div class="meudia-month-num">${d}</div></div>`;
+  }
+  // Current month
+  for (let d=1;d<=lastDay;d++) {
+    const ds = `${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = ds === todayStr;
+    const {personal, outlook} = meudiaEventsForDate(ds);
+    const allEvs = [
+      ...outlook.map(e=>({type:'outlook',label:e.subject||''})),
+      ...personal.map(e=>({type:'personal',label:e.title,done:e.done}))
+    ];
+    const shown = allEvs.slice(0,3);
+    const more = allEvs.length - 3;
+    cells += `<div class="meudia-month-cell${isToday?' today-cell':''}" onclick="meudiaSelectDate('${ds}')">
+      <div class="meudia-month-num${isToday?' today':''}">${d}</div>
+      ${shown.map(e=>`<div class="meudia-month-event ${e.type}${e.done?' done':''}">${esc(e.label)}</div>`).join('')}
+      ${more>0?`<div class="meudia-month-more">+${more}</div>`:''}
+    </div>`;
+  }
+  // Next month fill
+  const total = startDow + lastDay;
+  const remainder = total%7===0 ? 0 : 7-(total%7);
+  const nextM = month===12?1:month+1, nextY = month===12?year+1:year;
+  for (let d=1;d<=remainder;d++) {
+    const ds = `${nextY}-${String(nextM).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    cells += `<div class="meudia-month-cell other-month" onclick="meudiaSelectDate('${ds}')"><div class="meudia-month-num">${d}</div></div>`;
+  }
+  return `<div class="meudia-month-wrap">
+    <div class="meudia-month-header">${headerHtml}</div>
+    <div class="meudia-month-grid">${cells}</div>
+  </div>`;
+}
+
+function renderMeuDiaModal() {
+  if (!S.meudiaModal) return '';
+  const m = S.meudiaModal;
+  const projNames = ['', ...new Set(S.tasks.map(t=>t.project).filter(Boolean))];
+  const projOpts = projNames.map(p=>`<option value="${esc(p)}"${m.project===p?' selected':''}>${p||'— Nenhum —'}</option>`).join('');
+  return `<div class="modal-overlay open" onclick="if(event.target===this)meudiaCloseModal()">
+    <div class="modal-box narrow">
+      <div class="modal-header">
+        <span style="font-weight:800;font-size:15px;color:#001a70;">+ Nova atividade</span>
+        <button onclick="meudiaCloseModal()" style="background:none;border:none;font-size:22px;color:#7A9BB5;cursor:pointer;line-height:1;">×</button>
+      </div>
+      <label class="form-label">Descrição *</label>
+      <input class="form-input" id="meudia-inp-title" value="${esc(m.title||'')}"
+        oninput="S.meudiaModal.title=this.value;this.style.borderColor=''"
+        placeholder="O que precisa fazer?" style="margin-bottom:12px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div>
+          <label class="form-label">Data</label>
+          <input class="form-input" type="date" value="${m.date||''}" oninput="S.meudiaModal.date=this.value">
+        </div>
+        <div>
+          <label class="form-label">Horário (opcional)</label>
+          <input class="form-input" type="time" value="${m.time||''}" oninput="S.meudiaModal.time=this.value">
+        </div>
+      </div>
+      <label class="form-label">Projeto (opcional)</label>
+      <select class="form-input" onchange="S.meudiaModal.project=this.value" style="margin-bottom:8px;">${projOpts}</select>
+      ${m.project?`<label style="display:flex;align-items:center;gap:7px;font-size:12px;color:#001a70;margin-bottom:12px;cursor:pointer;">
+        <input type="checkbox" onchange="S.meudiaModal.addToProject=this.checked" style="cursor:pointer;">
+        Adicionar também como tarefa no projeto
+      </label>`:'<div style="margin-bottom:12px;"></div>'}
+      <label class="form-label">Notas (opcional)</label>
+      <textarea class="form-textarea" rows="2" oninput="S.meudiaModal.notes=this.value"
+        placeholder="Contexto, links, observações..." style="min-height:56px;margin-bottom:16px;">${esc(m.notes||'')}</textarea>
+      <div style="display:flex;justify-content:flex-end;gap:10px;">
+        <button class="btn-cancel" onclick="meudiaCloseModal()">Cancelar</button>
+        <button class="btn-save" onclick="meudiaAddItem()">Salvar</button>
+      </div>
+    </div>
+  </div>`;
 }
 
 </script>
