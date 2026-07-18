@@ -3487,7 +3487,7 @@ async function pbiTriggerModel(modelName) {
     if (!r.ok) throw new Error('HTTP ' + r.status);
   } catch(e) {
     if (PBI_STATUS[modelName] && PBI_STATUS[modelName].state === 'loading')
-      PBI_STATUS[modelName] = { state: 'error', endTime: Date.now() };
+      PBI_STATUS[modelName] = { state: 'error', endTime: Date.now(), errorMsg: e.message };
     renderPbiWidget();
   }
 }
@@ -3509,7 +3509,7 @@ async function pbiTriggerGroup(groupName) {
       if (!r.ok) throw new Error('HTTP ' + r.status);
     } catch(e) {
       if (PBI_STATUS[m] && PBI_STATUS[m].state === 'loading')
-        PBI_STATUS[m] = { state: 'error', endTime: Date.now() };
+        PBI_STATUS[m] = { state: 'error', endTime: Date.now(), errorMsg: e.message };
     }
   }));
   renderPbiWidget();
@@ -3577,7 +3577,8 @@ function buildPbiWidgetHtml() {
           : '';
         statusHtml = '<div class="pbi-model-status done">&#10003; ' + t + '</div>';
       } else if (ms === 'error') {
-        statusHtml = '<div class="pbi-model-status error">&#10005; Erro — tentar novamente</div>';
+        var errDetail = (st && st.errorMsg) ? ' (' + st.errorMsg + ')' : '';
+        statusHtml = '<div class="pbi-model-status error">&#10005; Erro' + errDetail + '</div>';
       }
       var dis   = ms === 'loading' ? 'disabled' : '';
       var cls   = 'pbi-model-btn ' + ms + (cfg ? '' : ' unconfigured');
