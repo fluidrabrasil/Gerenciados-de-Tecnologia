@@ -370,6 +370,49 @@ input,select,textarea{font-family:inherit;color:#001a70;}
 .meudia-outlook-dot.error{background:#C0392B;}
 @keyframes pulse{from{opacity:.5}to{opacity:1}}
 
+/* ─── POWER BI WIDGET ──────────────────────────────────────────────────────── */
+.pbi-widget{background:#fff;border-radius:12px;border:1.5px solid #E0EBF5;padding:20px 24px 16px;box-shadow:0 2px 12px rgba(0,26,112,.07);}
+.pbi-widget-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.pbi-widget-title{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:800;color:#001a70;}
+.pbi-badge{font-size:10px;border-radius:4px;padding:2px 8px;font-weight:700;border:1px solid;}
+.pbi-badge.loading{background:#FFF8EC;color:#F5A623;border-color:#F5A62355;}
+.pbi-badge.done{background:#EDFAF3;color:#27AE60;border-color:#27AE6055;}
+.pbi-badge.warn{background:#FFF8EC;color:#F5A623;border-color:#F5A62355;}
+.pbi-group-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.pbi-group-btn{border-radius:10px;border:none;padding:13px 16px;cursor:pointer;text-align:left;transition:all .2s;position:relative;overflow:hidden;}
+.pbi-group-btn.idle{background:linear-gradient(135deg,#001a70 0%,#2a3db0 100%);}
+.pbi-group-btn.idle:hover{opacity:.9;transform:translateY(-1px);}
+.pbi-group-btn.loading{background:linear-gradient(135deg,#E8961A 0%,#F5A623 100%);cursor:default;}
+.pbi-group-btn.done{background:linear-gradient(135deg,#1a8a4a 0%,#27AE60 100%);}
+.pbi-group-btn.error{background:linear-gradient(135deg,#9a2a1f 0%,#C0392B 100%);}
+.pbi-group-btn.error:hover{opacity:.9;}
+.pbi-group-btn.unconfigured{background:#F0F5FA;cursor:not-allowed;opacity:.6;}
+.pbi-group-name{font-size:12px;font-weight:800;color:#fff;margin-bottom:2px;letter-spacing:.3px;}
+.pbi-group-sub{font-size:10px;color:rgba(255,255,255,.65);}
+.pbi-group-status{font-size:10px;color:rgba(255,255,255,.9);margin-top:6px;font-weight:600;}
+.pbi-group-btn.unconfigured .pbi-group-name,.pbi-group-btn.unconfigured .pbi-group-status{color:#7A9BB5;}
+.pbi-group-btn.unconfigured .pbi-group-sub{color:#B0C4D0;}
+.pbi-gbar{height:3px;background:rgba(255,255,255,.25);border-radius:99px;margin-top:7px;overflow:hidden;}
+.pbi-gbar-fill{height:100%;background:#fff;border-radius:99px;transition:width 5s linear;}
+.pbi-section-lbl{font-size:10px;font-weight:700;color:#7A9BB5;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.pbi-models-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(172px,1fr));gap:7px;}
+.pbi-model-btn{border-radius:8px;border:1.5px solid #E0EBF5;padding:9px 11px;cursor:pointer;background:#F7FAFD;text-align:left;transition:all .15s;}
+.pbi-model-btn:hover:not([disabled]){background:#EAF4FF;border-color:#8393ff;}
+.pbi-model-btn.loading{background:#FFF8EC;border-color:#F5A623;cursor:default;}
+.pbi-model-btn.done{background:#EDFAF3;border-color:#27AE60;}
+.pbi-model-btn.error{background:#FDE8E8;border-color:#C0392B;}
+.pbi-model-btn.unconfigured{opacity:.5;cursor:not-allowed;}
+.pbi-model-name{font-size:10px;font-weight:700;color:#001a70;line-height:1.3;margin-bottom:3px;}
+.pbi-model-status{font-size:9.5px;color:#7A9BB5;display:flex;align-items:center;gap:3px;}
+.pbi-model-status.loading{color:#E8961A;}
+.pbi-model-status.done{color:#27AE60;}
+.pbi-model-status.error{color:#C0392B;}
+.pbi-mbar{height:2px;background:#F0F0F0;border-radius:99px;margin-top:4px;overflow:hidden;}
+.pbi-mbar-fill{height:100%;background:#F5A623;border-radius:99px;transition:width 5s linear;}
+.pbi-spin{display:inline-block;animation:pbi-rotate .8s linear infinite;}
+@keyframes pbi-rotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+
 </style>
 </head>
 <body>
@@ -1519,6 +1562,8 @@ function renderHome() {
     </div>
     <div class="home-section-label">Ferramentas disponíveis</div>
     <div class="home-grid">${cards}</div>
+    <div class="home-section-label" style="margin-top:28px;padding-bottom:0;">⚡ Atualização Power BI</div>
+    <div style="padding:0 36px 48px;"><div class="pbi-widget" id="pbi-widget">${buildPbiWidgetHtml()}</div></div>
   </div>`;
 }
 
@@ -3356,6 +3401,185 @@ function renderMeuDiaModal() {
       </div>
     </div>
   </div>`;
+}
+
+
+// ─── POWER BI REFRESH WIDGET ─────────────────────────────────────────────────
+const PBI_REFRESH_URL = ''; // Preencha com a URL do fluxo GTI_PBI_Refresh após criá-lo
+const PBI_ESTIMATED_MINS = 5; // Tempo estimado de atualização em minutos
+
+const PBI_MODELS = [
+  'COCKPIT DE VENDAS',
+  'DASHBOARD COMPRAS',
+  'DASHBOARD CONTAS A RECEBER',
+  'DIGITAL MARKET',
+  'FECHAMENTO CONTROLADORIA',
+  'MARGENS GERENCIAIS',
+  'PAINEL GERENCIAL',
+  'PREVISÃO FATURAMENTO CARTEIRA DE PEDIDO',
+  'PRICING'
+];
+
+const PBI_GROUPS = {
+  'FECHAMENTO MÊS': ['COCKPIT DE VENDAS','FECHAMENTO CONTROLADORIA','PAINEL GERENCIAL','DASHBOARD CONTAS A RECEBER','PRICING'],
+  'FECHAMENTO CUSTOS': ['COCKPIT DE VENDAS','MARGENS GERENCIAIS','PAINEL GERENCIAL','PRICING']
+};
+
+let PBI_STATUS = {};   // { modelName: { state, startTime, endTime } }
+let _pbiTicker = null;
+
+function pbiState(m) { return (PBI_STATUS[m] && PBI_STATUS[m].state) || 'idle'; }
+
+function pbiGroupState(g) {
+  const ms = PBI_GROUPS[g];
+  if (ms.some(m => pbiState(m) === 'error'))   return 'error';
+  if (ms.some(m => pbiState(m) === 'loading')) return 'loading';
+  if (ms.every(m => pbiState(m) === 'done'))   return 'done';
+  return 'idle';
+}
+
+function pbiPct(m) {
+  const st = PBI_STATUS[m];
+  if (!st || st.state !== 'loading') return 0;
+  return Math.min(95, (Date.now() - st.startTime) / (PBI_ESTIMATED_MINS * 60000) * 100);
+}
+
+function pbiGroupPct(g) {
+  const loading = PBI_GROUPS[g].filter(m => pbiState(m) === 'loading');
+  if (!loading.length) return 0;
+  return loading.reduce((s, m) => s + pbiPct(m), 0) / loading.length;
+}
+
+function pbiStartTicker() {
+  if (_pbiTicker) return;
+  _pbiTicker = setInterval(() => {
+    let anyLoading = false;
+    PBI_MODELS.forEach(m => {
+      const st = PBI_STATUS[m];
+      if (st && st.state === 'loading') {
+        if (Date.now() - st.startTime >= PBI_ESTIMATED_MINS * 60000) {
+          PBI_STATUS[m] = { state: 'done', endTime: Date.now() };
+        } else { anyLoading = true; }
+      }
+    });
+    renderPbiWidget();
+    if (!anyLoading) { clearInterval(_pbiTicker); _pbiTicker = null; }
+  }, 5000);
+}
+
+function renderPbiWidget() {
+  const el = document.getElementById('pbi-widget');
+  if (el) el.innerHTML = buildPbiWidgetHtml();
+}
+
+async function pbiTriggerModel(modelName) {
+  if (!PBI_REFRESH_URL) { alert('Configure a constante PBI_REFRESH_URL com a URL do fluxo GTI_PBI_Refresh.'); return; }
+  if (pbiState(modelName) === 'loading') return;
+  PBI_STATUS[modelName] = { state: 'loading', startTime: Date.now() };
+  renderPbiWidget();
+  pbiStartTicker();
+  try {
+    const r = await fetch(PBI_REFRESH_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: modelName })
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+  } catch(e) {
+    if (PBI_STATUS[modelName] && PBI_STATUS[modelName].state === 'loading')
+      PBI_STATUS[modelName] = { state: 'error', endTime: Date.now() };
+    renderPbiWidget();
+  }
+}
+
+async function pbiTriggerGroup(groupName) {
+  if (!PBI_REFRESH_URL) { alert('Configure a constante PBI_REFRESH_URL com a URL do fluxo GTI_PBI_Refresh.'); return; }
+  PBI_GROUPS[groupName].forEach(m => {
+    if (pbiState(m) !== 'loading') PBI_STATUS[m] = { state: 'loading', startTime: Date.now() };
+  });
+  renderPbiWidget();
+  pbiStartTicker();
+  await Promise.all(PBI_GROUPS[groupName].map(async m => {
+    try {
+      const r = await fetch(PBI_REFRESH_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: m })
+      });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+    } catch(e) {
+      if (PBI_STATUS[m] && PBI_STATUS[m].state === 'loading')
+        PBI_STATUS[m] = { state: 'error', endTime: Date.now() };
+    }
+  }));
+  renderPbiWidget();
+}
+
+function pbiClickModel(btn) { pbiTriggerModel(btn.dataset.model); }
+function pbiClickGroup(btn) { pbiTriggerGroup(btn.dataset.group); }
+
+function buildPbiWidgetHtml() {
+  const cfg = !!PBI_REFRESH_URL;
+  const anyLoading = PBI_MODELS.some(m => pbiState(m) === 'loading');
+  const anyDone    = PBI_MODELS.some(m => pbiState(m) === 'done');
+  const anyError   = PBI_MODELS.some(m => pbiState(m) === 'error');
+
+  const statusBadge = anyLoading
+    ? '<span class="pbi-badge loading">⏳ Atualizando</span>'
+    : (!anyLoading && anyDone && !anyError)
+      ? '<span class="pbi-badge done">✓ Concluído</span>'
+      : !cfg
+        ? '<span class="pbi-badge warn">⚙ Fluxo não configurado</span>'
+        : '';
+
+  // ── Group buttons ──
+  const groupBtns = Object.entries(PBI_GROUPS).map(([g, ms]) => {
+    const gs  = pbiGroupState(g);
+    const pct = pbiGroupPct(g);
+    const ico  = {idle:'🔄',loading:'⏳',done:'✅',error:'⚠️'}[gs];
+    const lbl  = {
+      idle:    'Clique para atualizar',
+      loading: `Atualizando... ${Math.round(pct)}%`,
+      done:    'Concluído com sucesso',
+      error:   'Erro — tentar novamente'
+    }[gs];
+    const dis = gs === 'loading' ? 'disabled' : '';
+    return `<button class="pbi-group-btn ${gs}${!cfg?' unconfigured':''}" ${cfg?`data-group="${g}" onclick="pbiClickGroup(this)"`:''}  ${dis}>
+      <div class="pbi-group-name">${ico} ${g}</div>
+      <div class="pbi-group-sub">${ms.length} modelos</div>
+      <div class="pbi-group-status">${lbl}</div>
+      ${gs==='loading'?`<div class="pbi-gbar"><div class="pbi-gbar-fill" style="width:${pct}%"></div></div>`:''}
+    </button>`;
+  }).join('');
+
+  // ── Individual model buttons ──
+  const modelBtns = PBI_MODELS.map(model => {
+    const ms  = pbiState(model);
+    const pct = pbiPct(model);
+    const st  = PBI_STATUS[model];
+    let statusHtml = '';
+    if      (ms === 'idle')    statusHtml = `<div class="pbi-model-status">Aguardando</div>`;
+    else if (ms === 'loading') statusHtml = `<div class="pbi-model-status loading"><span class="pbi-spin">⟳</span>&nbsp;${Math.round(pct)}%</div><div class="pbi-mbar"><div class="pbi-mbar-fill" style="width:${pct}%"></div></div>`;
+    else if (ms === 'done')    statusHtml = `<div class="pbi-model-status done">✓ ${st&&st.endTime?new Date(st.endTime).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):''}</div>`;
+    else if (ms === 'error')   statusHtml = `<div class="pbi-model-status error">✗ Erro — tentar novamente</div>`;
+    const dis = ms === 'loading' ? 'disabled' : '';
+    return `<button class="pbi-model-btn ${ms}${!cfg?' unconfigured':''}" ${cfg?`data-model="${model}" onclick="pbiClickModel(this)"`:''} ${dis} title="${model}">
+      <div class="pbi-model-name">${model}</div>
+      ${statusHtml}
+    </button>`;
+  }).join('');
+
+  return `
+    <div class="pbi-widget-header">
+      <div class="pbi-widget-title">
+        <span style="font-size:17px;line-height:1;">⚡</span>
+        <span>Atualização Power BI</span>
+        ${statusBadge}
+      </div>
+    </div>
+    <div class="pbi-group-row">${groupBtns}</div>
+    <div class="pbi-section-lbl">Individuais</div>
+    <div class="pbi-models-grid">${modelBtns}</div>`;
 }
 
 </script>
