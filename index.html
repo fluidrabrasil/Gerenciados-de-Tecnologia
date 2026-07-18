@@ -3425,17 +3425,14 @@ const PBI_GROUPS = {
   'FECHAMENTO CUSTOS': ['COCKPIT DE VENDAS','MARGENS GERENCIAIS','PAINEL GERENCIAL','PRICING']
 };
 
-let PBI_STATUS = {};   // { modelName: { state, startTime, endTime } }
+let PBI_STATUS = {};        // { modelName: { state, startTime, endTime } }
+let PBI_GROUP_STATUS = {};  // { groupName: { state, startTime, endTime } } — independent from models
 let _pbiTicker = null;
 
 function pbiState(m) { return (PBI_STATUS[m] && PBI_STATUS[m].state) || 'idle'; }
 
 function pbiGroupState(g) {
-  const ms = PBI_GROUPS[g];
-  if (ms.some(m => pbiState(m) === 'error'))   return 'error';
-  if (ms.some(m => pbiState(m) === 'loading')) return 'loading';
-  if (ms.every(m => pbiState(m) === 'done'))   return 'done';
-  return 'idle';
+  return (PBI_GROUP_STATUS[g] && PBI_GROUP_STATUS[g].state) || 'idle';
 }
 
 function pbiPct(m) {
@@ -3445,9 +3442,9 @@ function pbiPct(m) {
 }
 
 function pbiGroupPct(g) {
-  const loading = PBI_GROUPS[g].filter(m => pbiState(m) === 'loading');
-  if (!loading.length) return 0;
-  return loading.reduce((s, m) => s + pbiPct(m), 0) / loading.length;
+  const st = PBI_GROUP_STATUS[g];
+  if (!st || st.state !== 'loading') return 0;
+  return Math.min(95, (Date.now() - st.startTime) / (PBI_ESTIMATED_MINS * 60000) * 100);
 }
 
 function pbiStartTicker() {
@@ -3459,6 +3456,14 @@ function pbiStartTicker() {
       if (st && st.state === 'loading') {
         if (Date.now() - st.startTime >= PBI_ESTIMATED_MINS * 60000) {
           PBI_STATUS[m] = { state: 'done', endTime: Date.now() };
+        } else { anyLoading = true; }
+      }
+    });
+    Object.keys(PBI_GROUP_STATUS).forEach(g => {
+      const st = PBI_GROUP_STATUS[g];
+      if (st && st.state === 'loading') {
+        if (Date.now() - st.startTime >= PBI_ESTIMATED_MINS * 60000) {
+          PBI_GROUP_STATUS[g] = { state: 'done', endTime: Date.now() };
         } else { anyLoading = true; }
       }
     });
@@ -3494,11 +3499,11 @@ async function pbiTriggerModel(modelName) {
 
 async function pbiTriggerGroup(groupName) {
   if (!PBI_REFRESH_URL) { alert('Configure a constante PBI_REFRESH_URL com a URL do fluxo GTI_PBI_Refresh.'); return; }
-  PBI_GROUPS[groupName].forEach(m => {
-    if (pbiState(m) !== 'loading') PBI_STATUS[m] = { state: 'loading', startTime: Date.now() };
-  });
+  if (pbiGroupState(groupName) === 'loading') return;
+  PBI_GROUP_STATUS[groupName] = { state: 'loading', startTime: Date.now() };
   renderPbiWidget();
   pbiStartTicker();
+  let firstErr = null;
   await Promise.all(PBI_GROUPS[groupName].map(async m => {
     try {
       const r = await fetch(PBI_REFRESH_URL, {
@@ -3508,11 +3513,13 @@ async function pbiTriggerGroup(groupName) {
       });
       if (!r.ok) throw new Error('HTTP ' + r.status);
     } catch(e) {
-      if (PBI_STATUS[m] && PBI_STATUS[m].state === 'loading')
-        PBI_STATUS[m] = { state: 'error', endTime: Date.now(), errorMsg: e.message };
+      if (!firstErr) firstErr = e.message;
     }
   }));
-  renderPbiWidget();
+  if (firstErr) {
+    PBI_GROUP_STATUS[groupName] = { state: 'error', endTime: Date.now(), errorMsg: firstErr };
+    renderPbiWidget();
+  }
 }
 
 function pbiClickModel(btn) { pbiTriggerModel(btn.dataset.model); }
@@ -3521,9 +3528,12 @@ function pbiClickGroup(btn) { pbiTriggerGroup(btn.dataset.group); }
 function buildPbiWidgetHtml() {
   try {
     var cfg = !!PBI_REFRESH_URL;
-    var anyLoading = PBI_MODELS.some(function(m){ return pbiState(m) === 'loading'; });
-    var anyDone    = PBI_MODELS.some(function(m){ return pbiState(m) === 'done'; });
-    var anyError   = PBI_MODELS.some(function(m){ return pbiState(m) === 'error'; });
+    var anyLoading = PBI_MODELS.some(function(m){ return pbiState(m) === 'loading'; })
+      || Object.values(PBI_GROUP_STATUS).some(function(s){ return s && s.state === 'loading'; });
+    var anyDone = PBI_MODELS.some(function(m){ return pbiState(m) === 'done'; })
+      || Object.values(PBI_GROUP_STATUS).some(function(s){ return s && s.state === 'done'; });
+    var anyError = PBI_MODELS.some(function(m){ return pbiState(m) === 'error'; })
+      || Object.values(PBI_GROUP_STATUS).some(function(s){ return s && s.state === 'error'; });
 
     var statusBadge = anyLoading
       ? '<span class="pbi-badge loading">&#9203; Atualizando</span>'
@@ -3538,11 +3548,13 @@ function buildPbiWidgetHtml() {
       var gs  = pbiGroupState(g);
       var pct = pbiGroupPct(g);
       var icoMap = {idle:'&#128260;', loading:'&#9203;', done:'&#9989;', error:'&#9888;'};
+      var gst = PBI_GROUP_STATUS[g];
+      var errDetail = (gst && gst.errorMsg) ? ' (' + gst.errorMsg + ')' : '';
       var lblMap = {
         idle:    'Clique para atualizar',
         loading: 'Atualizando... ' + Math.round(pct) + '%',
         done:    'Concluído com sucesso',
-        error:   'Erro — tentar novamente'
+        error:   'Erro' + errDetail + ' — tentar novamente'
       };
       var ico  = icoMap[gs] || '';
       var lbl  = lblMap[gs] || '';
