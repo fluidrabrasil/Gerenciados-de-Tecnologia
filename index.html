@@ -3519,69 +3519,88 @@ function pbiClickModel(btn) { pbiTriggerModel(btn.dataset.model); }
 function pbiClickGroup(btn) { pbiTriggerGroup(btn.dataset.group); }
 
 function buildPbiWidgetHtml() {
-  const cfg = !!PBI_REFRESH_URL;
-  const anyLoading = PBI_MODELS.some(m => pbiState(m) === 'loading');
-  const anyDone    = PBI_MODELS.some(m => pbiState(m) === 'done');
-  const anyError   = PBI_MODELS.some(m => pbiState(m) === 'error');
+  try {
+    var cfg = !!PBI_REFRESH_URL;
+    var anyLoading = PBI_MODELS.some(function(m){ return pbiState(m) === 'loading'; });
+    var anyDone    = PBI_MODELS.some(function(m){ return pbiState(m) === 'done'; });
+    var anyError   = PBI_MODELS.some(function(m){ return pbiState(m) === 'error'; });
 
-  const statusBadge = anyLoading
-    ? '<span class="pbi-badge loading">⏳ Atualizando</span>'
-    : (!anyLoading && anyDone && !anyError)
-      ? '<span class="pbi-badge done">✓ Concluído</span>'
-      : !cfg
-        ? '<span class="pbi-badge warn">⚙ Fluxo não configurado</span>'
+    var statusBadge = anyLoading
+      ? '<span class="pbi-badge loading">&#9203; Atualizando</span>'
+      : (!anyLoading && anyDone && !anyError)
+        ? '<span class="pbi-badge done">&#10003; Conclui&#769;do</span>'
+        : !cfg
+          ? '<span class="pbi-badge warn">&#9881; Fluxo na&#771;o configurado</span>'
+          : '';
+
+    var groupBtns = Object.entries(PBI_GROUPS).map(function(entry) {
+      var g = entry[0], models = entry[1];
+      var gs  = pbiGroupState(g);
+      var pct = pbiGroupPct(g);
+      var icoMap = {idle:'&#128260;', loading:'&#9203;', done:'&#9989;', error:'&#9888;'};
+      var lblMap = {
+        idle:    'Clique para atualizar',
+        loading: 'Atualizando... ' + Math.round(pct) + '%',
+        done:    'Concluído com sucesso',
+        error:   'Erro — tentar novamente'
+      };
+      var ico  = icoMap[gs] || '';
+      var lbl  = lblMap[gs] || '';
+      var cls  = 'pbi-group-btn ' + gs + (cfg ? '' : ' unconfigured');
+      var attrs = cfg ? ('data-group="' + g + '" onclick="pbiClickGroup(this)"') : '';
+      var dis  = gs === 'loading' ? 'disabled' : '';
+      var prog = gs === 'loading'
+        ? '<div class="pbi-gbar"><div class="pbi-gbar-fill" style="width:' + pct + '%"></div></div>'
         : '';
+      return '<button class="' + cls + '" ' + attrs + ' ' + dis + '>'
+        + '<div class="pbi-group-name">' + ico + ' ' + g + '</div>'
+        + '<div class="pbi-group-sub">' + models.length + ' modelos</div>'
+        + '<div class="pbi-group-status">' + lbl + '</div>'
+        + prog
+        + '</button>';
+    }).join('');
 
-  // ── Group buttons ──
-  const groupBtns = Object.entries(PBI_GROUPS).map(([g, ms]) => {
-    const gs  = pbiGroupState(g);
-    const pct = pbiGroupPct(g);
-    const ico  = {idle:'🔄',loading:'⏳',done:'✅',error:'⚠️'}[gs];
-    const lbl  = {
-      idle:    'Clique para atualizar',
-      loading: `Atualizando... ${Math.round(pct)}%`,
-      done:    'Concluído com sucesso',
-      error:   'Erro — tentar novamente'
-    }[gs];
-    const dis = gs === 'loading' ? 'disabled' : '';
-    return `<button class="pbi-group-btn ${gs}${!cfg?' unconfigured':''}" ${cfg?`data-group="${g}" onclick="pbiClickGroup(this)"`:''}  ${dis}>
-      <div class="pbi-group-name">${ico} ${g}</div>
-      <div class="pbi-group-sub">${ms.length} modelos</div>
-      <div class="pbi-group-status">${lbl}</div>
-      ${gs==='loading'?`<div class="pbi-gbar"><div class="pbi-gbar-fill" style="width:${pct}%"></div></div>`:''}
-    </button>`;
-  }).join('');
+    var modelBtns = PBI_MODELS.map(function(model) {
+      var ms  = pbiState(model);
+      var pct = pbiPct(model);
+      var st  = PBI_STATUS[model];
+      var statusHtml = '';
+      if (ms === 'idle') {
+        statusHtml = '<div class="pbi-model-status">Aguardando</div>';
+      } else if (ms === 'loading') {
+        statusHtml = '<div class="pbi-model-status loading"><span class="pbi-spin">&#8635;</span>&nbsp;'
+          + Math.round(pct) + '%</div>'
+          + '<div class="pbi-mbar"><div class="pbi-mbar-fill" style="width:' + pct + '%"></div></div>';
+      } else if (ms === 'done') {
+        var t = (st && st.endTime)
+          ? new Date(st.endTime).toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})
+          : '';
+        statusHtml = '<div class="pbi-model-status done">&#10003; ' + t + '</div>';
+      } else if (ms === 'error') {
+        statusHtml = '<div class="pbi-model-status error">&#10005; Erro — tentar novamente</div>';
+      }
+      var dis   = ms === 'loading' ? 'disabled' : '';
+      var cls   = 'pbi-model-btn ' + ms + (cfg ? '' : ' unconfigured');
+      var attrs = cfg ? ('data-model="' + model + '" onclick="pbiClickModel(this)"') : '';
+      return '<button class="' + cls + '" ' + attrs + ' ' + dis + ' title="' + model + '">'
+        + '<div class="pbi-model-name">' + model + '</div>'
+        + statusHtml
+        + '</button>';
+    }).join('');
 
-  // ── Individual model buttons ──
-  const modelBtns = PBI_MODELS.map(model => {
-    const ms  = pbiState(model);
-    const pct = pbiPct(model);
-    const st  = PBI_STATUS[model];
-    let statusHtml = '';
-    if      (ms === 'idle')    statusHtml = `<div class="pbi-model-status">Aguardando</div>`;
-    else if (ms === 'loading') statusHtml = `<div class="pbi-model-status loading"><span class="pbi-spin">⟳</span>&nbsp;${Math.round(pct)}%</div><div class="pbi-mbar"><div class="pbi-mbar-fill" style="width:${pct}%"></div></div>`;
-    else if (ms === 'done')    statusHtml = `<div class="pbi-model-status done">✓ ${st&&st.endTime?new Date(st.endTime).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):''}</div>`;
-    else if (ms === 'error')   statusHtml = `<div class="pbi-model-status error">✗ Erro — tentar novamente</div>`;
-    const dis = ms === 'loading' ? 'disabled' : '';
-    return `<button class="pbi-model-btn ${ms}${!cfg?' unconfigured':''}" ${cfg?`data-model="${model}" onclick="pbiClickModel(this)"`:''} ${dis} title="${model}">
-      <div class="pbi-model-name">${model}</div>
-      ${statusHtml}
-    </button>`;
-  }).join('');
-
-  return `
-    <div class="pbi-widget-header">
-      <div class="pbi-widget-title">
-        <span style="font-size:17px;line-height:1;">⚡</span>
-        <span>Atualização Power BI</span>
-        ${statusBadge}
-      </div>
-    </div>
-    <div class="pbi-group-row">${groupBtns}</div>
-    <div class="pbi-section-lbl">Individuais</div>
-    <div class="pbi-models-grid">${modelBtns}</div>`;
+    return '<div class="pbi-widget-header">'
+      + '<div class="pbi-widget-title">'
+      + '<span style="font-size:17px;line-height:1;">&#9889;</span>'
+      + '<span>Atualização Power BI</span>'
+      + statusBadge
+      + '</div></div>'
+      + '<div class="pbi-group-row">' + groupBtns + '</div>'
+      + '<div class="pbi-section-lbl">Individuais</div>'
+      + '<div class="pbi-models-grid">' + modelBtns + '</div>';
+  } catch(e) {
+    console.error('PBI widget error:', e);
+    return '<div style="padding:10px;color:#C0392B;">Erro no widget PBI: ' + (e && e.message) + '</div>';
+  }
 }
 
 </script>
-</body>
-</html>
