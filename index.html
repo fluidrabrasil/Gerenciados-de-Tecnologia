@@ -371,7 +371,7 @@ input,select,textarea{font-family:inherit;color:#001a70;}
 @keyframes pulse{from{opacity:.5}to{opacity:1}}
 
 /* ─── POWER BI WIDGET ──────────────────────────────────────────────────────── */
-.pbi-widget{background:#fff;border-radius:12px;border:1.5px solid #E0EBF5;padding:20px 24px 16px;box-shadow:0 2px 12px rgba(0,26,112,.07);}
+.pbi-widget{background:#fff;border-radius:12px;border:1.5px solid #E0EBF5;padding:14px 18px 12px;box-shadow:0 2px 12px rgba(0,26,112,.07);}
 .pbi-widget-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
 .pbi-widget-title{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:800;color:#001a70;}
 .pbi-badge{font-size:10px;border-radius:4px;padding:2px 8px;font-weight:700;border:1px solid;}
@@ -379,7 +379,7 @@ input,select,textarea{font-family:inherit;color:#001a70;}
 .pbi-badge.done{background:#EDFAF3;color:#27AE60;border-color:#27AE6055;}
 .pbi-badge.warn{background:#FFF8EC;color:#F5A623;border-color:#F5A62355;}
 .pbi-group-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
-.pbi-group-btn{border-radius:10px;border:none;padding:13px 16px;cursor:pointer;text-align:left;transition:all .2s;position:relative;overflow:hidden;}
+.pbi-group-btn{border-radius:10px;border:none;padding:10px 14px;cursor:pointer;text-align:left;transition:all .2s;position:relative;overflow:hidden;}
 .pbi-group-btn.idle{background:linear-gradient(135deg,#001a70 0%,#2a3db0 100%);}
 .pbi-group-btn.idle:hover{opacity:.9;transform:translateY(-1px);}
 .pbi-group-btn.loading{background:linear-gradient(135deg,#E8961A 0%,#F5A623 100%);cursor:default;}
@@ -395,8 +395,8 @@ input,select,textarea{font-family:inherit;color:#001a70;}
 .pbi-gbar{height:3px;background:rgba(255,255,255,.25);border-radius:99px;margin-top:7px;overflow:hidden;}
 .pbi-gbar-fill{height:100%;background:#fff;border-radius:99px;transition:width 5s linear;}
 .pbi-section-lbl{font-size:10px;font-weight:700;color:#7A9BB5;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
-.pbi-models-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(172px,1fr));gap:7px;}
-.pbi-model-btn{border-radius:8px;border:1.5px solid #E0EBF5;padding:9px 11px;cursor:pointer;background:#F7FAFD;text-align:left;transition:all .15s;}
+.pbi-models-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+.pbi-model-btn{border-radius:8px;border:1.5px solid #E0EBF5;padding:7px 9px;cursor:pointer;background:#F7FAFD;text-align:left;transition:all .15s;}
 .pbi-model-btn:hover:not([disabled]){background:#EAF4FF;border-color:#8393ff;}
 .pbi-model-btn.loading{background:#FFF8EC;border-color:#F5A623;cursor:default;}
 .pbi-model-btn.done{background:#EDFAF3;border-color:#27AE60;}
@@ -1618,12 +1618,12 @@ function renderHome() {
       <div class="home-hero-title">Gestor de Tecnologia</div>
       <div class="home-hero-sub">Central de ferramentas do time de TI da Fluidra Brasil · ${cap(today)}</div>
     </div>
-    <div style="display:flex;gap:20px;padding:0 36px 48px;align-items:flex-start;">
-      <div style="flex:1;min-width:0;">
+    <div style="display:flex;gap:20px;padding:0 36px 32px;align-items:flex-start;">
+      <div style="width:420px;flex-shrink:0;">
         <div class="home-section-label" style="padding:0;margin-bottom:14px;">Ferramentas disponíveis</div>
         <div class="home-grid" style="padding:0;grid-template-columns:repeat(2,1fr);">${cards}</div>
       </div>
-      <div style="width:390px;flex-shrink:0;">
+      <div style="flex:1;min-width:0;">
         <div class="home-section-label" style="padding:0;margin-bottom:14px;">⚡ Atualização Power BI</div>
         <div class="pbi-widget" id="pbi-widget">${buildPbiWidgetHtml()}</div>
       </div>
