@@ -432,7 +432,7 @@ input,select,textarea{font-family:inherit;color:#001a70;}
 .meudia-tl-ad.done{background:#EDFAF3;color:#27AE60;text-decoration:line-through;}
 .meudia-tl-addday{background:none;border:none;color:#C5D8E8;font-size:14px;line-height:1;cursor:pointer;padding:0 2px;margin-left:auto;}
 .meudia-tl-addday:hover{color:#8393ff;}
-.meudia-tl-body{display:flex;overflow-y:auto;max-height:528px;}
+.meudia-tl-body{display:flex;overflow-y:visible;}
 .meudia-tl-timecol{width:48px;flex-shrink:0;position:relative;border-right:2px solid #C8D8EA;background:#F2F6FA;}
 .meudia-tl-tlabel{position:absolute;right:6px;font-size:9px;color:#7A9BB5;font-weight:700;transform:translateY(-50%);white-space:nowrap;pointer-events:none;}
 .meudia-tl-daysarea{flex:1;display:grid;grid-template-columns:repeat(7,1fr);position:relative;overflow:hidden;}
@@ -3168,7 +3168,7 @@ function meudiaDragDropWeekCol(date, e) {
   if (!item) return;
   var rect = e.currentTarget.getBoundingClientRect();
   var relY = Math.max(0, e.clientY - rect.top);
-  var START_HOUR = 7, HOUR_H = 64;
+  var START_HOUR = 7, HOUR_H = 48;
   var totalMins = (relY / HOUR_H) * 60;
   var absHour = Math.floor(START_HOUR + totalMins / 60);
   var minsFrac = totalMins % 60;
@@ -3459,7 +3459,7 @@ function renderMeuDiaDayView() {
 }
 
 function renderMeuDiaWeekView() {
-  var START_HOUR = 7, END_HOUR = 18, HOUR_H = 64;
+  var START_HOUR = 7, END_HOUR = 18, HOUR_H = 48;
   var TOTAL_H = (END_HOUR - START_HOUR) * HOUR_H;
   var DOWS = ['Seg','Ter','Qua','Qui','Sex','Sab','Dom'];
   var ws = meudiaGetWeekStart(S.meudiaDate);
@@ -3677,7 +3677,7 @@ function renderMeuDiaModal() {
         <div>${m.editId ? `<button onclick="meudiaDeleteItem(m.editId)" style="background:none;border:1px solid #e74c3c;color:#e74c3c;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;">🗑 Excluir</button>` : ''}</div>
         <div style="display:flex;gap:10px;">
           <button class="btn-cancel" onclick="meudiaCloseModal()">Cancelar</button>
-          <button class="btn-save" onclick="meudiaAddItem()">\${m.editId ? 'Salvar alterações' : 'Salvar'}</button>
+          <button class="btn-save" onclick="meudiaAddItem()">${m.editId ? 'Salvar alterações' : 'Salvar'}</button>
         </div>
       </div>
     </div>
