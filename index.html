@@ -413,6 +413,45 @@ input,select,textarea{font-family:inherit;color:#001a70;}
 @keyframes pbi-rotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 
 
+/* ─── MEU DIA — TIMELINE WEEK VIEW ─────────────────────────────────────────── */
+.meudia-tl-wrap{border-radius:10px;border:1.5px solid #E0EBF5;background:#fff;overflow:hidden;}
+.meudia-tl-header{display:grid;grid-template-columns:48px repeat(7,1fr);border-bottom:2px solid #E0EBF5;}
+.meudia-tl-corner{border-right:1px solid #E0EBF5;background:#F7FAFD;}
+.meudia-tl-hdr{text-align:center;padding:8px 4px 6px;border-right:1px solid #E0EBF5;cursor:pointer;transition:background .15s;}
+.meudia-tl-hdr:hover{background:#F7FAFD;}
+.meudia-tl-hdr.today{background:#F0F2FF;}
+.meudia-tl-dow{font-size:10px;font-weight:700;color:#7A9BB5;text-transform:uppercase;letter-spacing:.4px;}
+.meudia-tl-dnum{font-size:20px;font-weight:800;color:#001a70;line-height:1.2;}
+.meudia-tl-dnum.today{color:#fff;background:#8393ff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;margin:2px auto 0;}
+.meudia-tl-allday{display:grid;grid-template-columns:48px repeat(7,1fr);border-bottom:1.5px solid #E0EBF5;background:#F7FAFD;}
+.meudia-tl-ad-label{font-size:9px;font-weight:700;color:#7A9BB5;text-transform:uppercase;letter-spacing:.4px;border-right:1px solid #E0EBF5;display:flex;align-items:center;justify-content:center;padding:4px 2px;}
+.meudia-tl-ad-cell{border-right:1px solid #E0EBF5;padding:3px 4px;min-height:28px;display:flex;flex-wrap:wrap;gap:2px;align-items:flex-start;}
+.meudia-tl-ad{font-size:10px;font-weight:600;border-radius:3px;padding:1px 6px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;cursor:pointer;max-width:100%;}
+.meudia-tl-ad.outlook{background:#EAF4FF;color:#001a70;}
+.meudia-tl-ad.personal{background:#f0f2ff;color:#001a70;}
+.meudia-tl-ad.done{background:#EDFAF3;color:#27AE60;text-decoration:line-through;}
+.meudia-tl-addday{background:none;border:none;color:#C5D8E8;font-size:14px;line-height:1;cursor:pointer;padding:0 2px;margin-left:auto;}
+.meudia-tl-addday:hover{color:#8393ff;}
+.meudia-tl-body{display:flex;overflow-y:auto;max-height:528px;}
+.meudia-tl-timecol{width:48px;flex-shrink:0;position:relative;border-right:1px solid #E0EBF5;background:#F7FAFD;}
+.meudia-tl-tlabel{position:absolute;right:6px;font-size:9px;color:#7A9BB5;font-weight:700;transform:translateY(-50%);white-space:nowrap;pointer-events:none;}
+.meudia-tl-daysarea{flex:1;display:grid;grid-template-columns:repeat(7,1fr);position:relative;overflow:hidden;}
+.meudia-tl-dcol{position:relative;border-right:1px solid #E0EBF5;}
+.meudia-tl-dcol.today{background:rgba(131,147,255,0.04);}
+.meudia-tl-hline{position:absolute;left:0;right:0;height:1px;background:#E8EFF5;pointer-events:none;}
+.meudia-tl-hline.half{background:#F2F6FA;}
+.meudia-tl-ev{position:absolute;left:3px;right:3px;border-radius:4px;padding:2px 5px;overflow:hidden;cursor:pointer;border-left:3px solid;z-index:2;transition:opacity .15s;}
+.meudia-tl-ev:hover{opacity:.85;}
+.meudia-tl-ev.outlook{background:#EAF4FF;border-left-color:#001a70;}
+.meudia-tl-ev.personal{background:#f0f2ff;border-left-color:#8393ff;}
+.meudia-tl-ev.done{background:#EDFAF3;border-left-color:#27AE60;}
+.meudia-tl-ev-time{font-size:9px;color:#7A9BB5;font-weight:700;white-space:nowrap;overflow:hidden;}
+.meudia-tl-ev-title{font-size:10px;font-weight:700;color:#001a70;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.meudia-tl-ev.done .meudia-tl-ev-title{color:#27AE60;text-decoration:line-through;}
+.meudia-tl-nowline{position:absolute;left:0;right:0;height:2px;background:#E53935;z-index:10;pointer-events:none;}
+.meudia-tl-nowline::before{content:'';position:absolute;left:-4px;top:-3px;width:8px;height:8px;background:#E53935;border-radius:50%;}
+
+
 </style>
 </head>
 <body>
@@ -3278,38 +3317,110 @@ function renderMeuDiaDayView() {
 }
 
 function renderMeuDiaWeekView() {
-  const ws = meudiaGetWeekStart(S.meudiaDate);
-  const todayStr = new Date().toISOString().split('T')[0];
-  const DOWS = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
-  let cols = '';
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(ws + 'T12:00:00'); d.setDate(d.getDate() + i);
-    const dateStr = d.toISOString().split('T')[0];
-    const isToday = dateStr === todayStr;
-    const {personal, outlook} = meudiaEventsForDate(dateStr);
-    const sortedOutlook = [...outlook].filter(e=>meudiaGetDT(e.start)&&!e.isAllDay)
-      .map(e=>({type:'outlook',label:`${meudiaEventBRTTime(meudiaGetDT(e.start))} ${esc(e.subject||'')}`,webLink:e.webLink||'#'}));
-    const sortedPersonal = [...personal].map(e=>({type:'personal',label:`${e.time?e.time+' ':''}${esc(e.title)}`,done:e.done,id:e.id}));
-    const allEvs = [...sortedOutlook, ...sortedPersonal];
-    const shown = allEvs.slice(0, 4);
-    const more = allEvs.length - 4;
-    const evHtml = shown.map(e=>`<div class="meudia-week-event ${e.type}${e.done?' done':''}"
-        onclick="${e.type==='outlook'?`window.open('${e.webLink}','_blank')`:`meudiaToggleItem('${e.id}')`}"
-        title="${e.label}">${e.label}</div>`).join('');
-    cols += `<div class="meudia-week-col${isToday?' today':''}">
-      <div class="meudia-week-col-header" onclick="meudiaSelectDate('${dateStr}')">
-        <div class="meudia-week-dow">${DOWS[i]}</div>
-        <div class="meudia-week-day${isToday?' today-num':''}">${d.getDate()}</div>
-      </div>
-      <div class="meudia-week-events">
-        ${evHtml}
-        ${more>0?`<div class="meudia-week-more" onclick="meudiaSelectDate('${dateStr}')">+${more} mais</div>`:''}
-        ${!allEvs.length?`<div style="font-size:11px;color:#C5D8E8;padding:3px 7px;">Livre</div>`:''}
-      </div>
-      <button class="meudia-week-add" onclick="meudiaOpenAdd('${dateStr}','')">+ Adicionar</button>
-    </div>`;
+  var START_HOUR = 7, END_HOUR = 18, HOUR_H = 64;
+  var TOTAL_H = (END_HOUR - START_HOUR) * HOUR_H;
+  var DOWS = ['Seg','Ter','Qua','Qui','Sex','Sab','Dom'];
+  var ws = meudiaGetWeekStart(S.meudiaDate);
+  var todayStr = new Date().toISOString().split('T')[0];
+
+  var headerCells = '', allDayCells = '', dayCols = '';
+
+  for (var i = 0; i < 7; i++) {
+    var d = new Date(ws + 'T12:00:00'); d.setDate(d.getDate() + i);
+    var dateStr = d.toISOString().split('T')[0];
+    var isToday = dateStr === todayStr;
+    var evData = meudiaEventsForDate(dateStr);
+    var personal = evData.personal, outlook = evData.outlook;
+
+    // Header
+    headerCells += '<div class="meudia-tl-hdr' + (isToday ? ' today' : '') + '" onclick="meudiaSelectDate('' + dateStr + '')">'
+      + '<div class="meudia-tl-dow">' + DOWS[i] + '</div>'
+      + '<div class="meudia-tl-dnum' + (isToday ? ' today' : '') + '">' + d.getDate() + '</div>'
+      + '</div>';
+
+    // All-day row
+    var adHtml = outlook.filter(function(e){ return e.isAllDay; }).map(function(e){
+      return '<div class="meudia-tl-ad outlook" title="' + esc(e.subject||'') + '">' + esc(e.subject||'Evento') + '</div>';
+    }).join('');
+    adHtml += personal.filter(function(e){ return !e.time; }).map(function(e){
+      return '<div class="meudia-tl-ad personal' + (e.done?' done':'') + '" onclick="meudiaToggleItem('' + e.id + '')" title="' + esc(e.title) + '">' + esc(e.title) + '</div>';
+    }).join('');
+    allDayCells += '<div class="meudia-tl-ad-cell">' + adHtml
+      + '<button class="meudia-tl-addday" onclick="meudiaOpenAdd('' + dateStr + '','')" title="Adicionar">+</button></div>';
+
+    // Timed events
+    var evHtml = '';
+
+    // Outlook timed
+    outlook.filter(function(e){ return !e.isAllDay && meudiaGetDT(e.start); }).forEach(function(e){
+      var st = meudiaEventBRTTime(meudiaGetDT(e.start));
+      var et = meudiaGetDT(e.end) ? meudiaEventBRTTime(meudiaGetDT(e.end)) : '';
+      if (!st) return;
+      var parts = st.split(':'); var sh = +parts[0], sm = +parts[1];
+      var startMins = sh * 60 + sm;
+      var top = (startMins - START_HOUR * 60) / 60 * HOUR_H;
+      if (top < 0 || top >= TOTAL_H) return;
+      var durationMins = 60;
+      if (et) { var ep = et.split(':'); durationMins = Math.max(30, +ep[0]*60 + +ep[1] - startMins); }
+      var height = Math.max(26, Math.min(durationMins / 60 * HOUR_H, TOTAL_H - top));
+      var subj = esc(e.subject || 'Reuniao');
+      var timeLabel = st + (et ? '–' + et : '');
+      evHtml += '<div class="meudia-tl-ev outlook" style="top:' + top + 'px;height:' + height + 'px;"'
+        + ' onclick="window.open('' + (e.webLink||'#') + '','_blank')" title="' + subj + '">'
+        + '<div class="meudia-tl-ev-time">' + timeLabel + '</div>'
+        + '<div class="meudia-tl-ev-title">' + subj + '</div>'
+        + '</div>';
+    });
+
+    // Personal timed tasks
+    personal.filter(function(e){ return !!e.time; }).forEach(function(e){
+      var parts = e.time.split(':'); var sh = +parts[0], sm = +(parts[1]||0);
+      var top = (sh * 60 + sm - START_HOUR * 60) / 60 * HOUR_H;
+      if (top < 0 || top >= TOTAL_H) return;
+      var title = esc(e.title);
+      evHtml += '<div class="meudia-tl-ev personal' + (e.done?' done':'') + '" style="top:' + top + 'px;height:28px;"'
+        + ' onclick="meudiaToggleItem('' + e.id + '')" title="' + title + '">'
+        + '<div class="meudia-tl-ev-time">' + e.time + '</div>'
+        + '<div class="meudia-tl-ev-title">' + title + '</div>'
+        + '</div>';
+    });
+
+    // Hour & half-hour lines
+    var hLines = '';
+    for (var h = START_HOUR; h < END_HOUR; h++) {
+      hLines += '<div class="meudia-tl-hline" style="top:' + ((h - START_HOUR) * HOUR_H) + 'px;"></div>';
+      hLines += '<div class="meudia-tl-hline half" style="top:' + ((h - START_HOUR) * HOUR_H + HOUR_H/2) + 'px;"></div>';
+    }
+
+    dayCols += '<div class="meudia-tl-dcol' + (isToday?' today':'') + '" style="height:' + TOTAL_H + 'px;">'
+      + hLines + evHtml + '</div>';
   }
-  return `<div class="meudia-week-grid">${cols}</div>`;
+
+  // Time labels
+  var timeLabels = '';
+  for (var h = START_HOUR; h <= END_HOUR; h++) {
+    var top = (h - START_HOUR) * HOUR_H;
+    timeLabels += '<div class="meudia-tl-tlabel" style="top:' + top + 'px;">' + (h < 10 ? '0' : '') + h + ':00</div>';
+  }
+
+  // Current time red line
+  var nowLine = '';
+  try {
+    var now = new Date(new Date().toLocaleString('en-US', {timeZone:'America/Sao_Paulo'}));
+    var nowTop = (now.getHours() * 60 + now.getMinutes() - START_HOUR * 60) / 60 * HOUR_H;
+    if (nowTop >= 0 && nowTop <= TOTAL_H) {
+      nowLine = '<div class="meudia-tl-nowline" style="top:' + nowTop + 'px;"></div>';
+    }
+  } catch(e) {}
+
+  return '<div class="meudia-tl-wrap">'
+    + '<div class="meudia-tl-header"><div class="meudia-tl-corner"></div>' + headerCells + '</div>'
+    + '<div class="meudia-tl-allday"><div class="meudia-tl-ad-label">Dia todo</div>' + allDayCells + '</div>'
+    + '<div class="meudia-tl-body">'
+    +   '<div class="meudia-tl-timecol" style="height:' + TOTAL_H + 'px;">' + timeLabels + '</div>'
+    +   '<div class="meudia-tl-daysarea" style="height:' + TOTAL_H + 'px;">' + dayCols + nowLine + '</div>'
+    + '</div>'
+    + '</div>';
 }
 
 function renderMeuDiaMonthView() {
