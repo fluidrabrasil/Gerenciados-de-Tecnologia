@@ -452,6 +452,13 @@ input,select,textarea{font-family:inherit;color:#001a70;}
 .meudia-tl-nowline::before{content:'';position:absolute;left:-4px;top:-3px;width:8px;height:8px;background:#E53935;border-radius:50%;}
 
 
+
+.meudia-drag-over{background:rgba(131,147,255,0.13)!important;outline:2px dashed #8393ff;outline-offset:-2px;}
+.meudia-tl-ev.personal{cursor:grab;}
+.meudia-tl-ev.personal:active{cursor:grabbing;opacity:.7;}
+.meudia-event.personal{cursor:grab;}
+.meudia-event.personal:active{cursor:grabbing;opacity:.7;}
+.meudia-tl-ad.personal{cursor:grab;}
 </style>
 </head>
 <body>
@@ -3111,6 +3118,104 @@ function meudiaSelectDate(dateStr) {
   render(); meudiaFetchForCurrentView();
 }
 
+
+function meudiaOpenEdit(id) {
+  var item = S.meudiaItems.find(function(x){ return x.id === id; });
+  if (!item) return;
+  S.meudiaModal = {
+    editId: id,
+    date: item.date,
+    time: item.time || '',
+    title: item.title || '',
+    project: item.project || '',
+    notes: item.notes || ''
+  };
+  render();
+  setTimeout(function(){ var el = document.getElementById('meudia-inp-title'); if(el) el.focus(); }, 50);
+}
+
+var _meudiaDragId = null;
+
+function meudiaDragStart(id, e) {
+  _meudiaDragId = id;
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', id);
+  e.currentTarget.style.opacity = '0.45';
+}
+
+function meudiaDragEnd(e) {
+  e.currentTarget.style.opacity = '';
+  _meudiaDragId = null;
+}
+
+function meudiaDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  e.currentTarget.classList.add('meudia-drag-over');
+}
+
+function meudiaDragLeave(e) {
+  e.currentTarget.classList.remove('meudia-drag-over');
+}
+
+// Drop na coluna do dia na view Semana — calcula horário pelo Y
+function meudiaDragDropWeekCol(date, e) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('meudia-drag-over');
+  var id = _meudiaDragId || e.dataTransfer.getData('text/plain');
+  if (!id) return;
+  var item = S.meudiaItems.find(function(x){ return x.id === id; });
+  if (!item) return;
+  var rect = e.currentTarget.getBoundingClientRect();
+  var relY = Math.max(0, e.clientY - rect.top);
+  var START_HOUR = 7, HOUR_H = 64;
+  var totalMins = (relY / HOUR_H) * 60;
+  var absHour = Math.floor(START_HOUR + totalMins / 60);
+  var minsFrac = totalMins % 60;
+  var snappedMins = minsFrac < 15 ? 0 : minsFrac < 45 ? 30 : 0;
+  var finalH = Math.max(START_HOUR, Math.min(absHour + (snappedMins === 0 && minsFrac >= 45 ? 1 : 0), 17));
+  var timeStr = (finalH < 10 ? '0' : '') + finalH + ':' + (snappedMins < 10 ? '0' : '') + snappedMins;
+  item.date = date;
+  item.time = timeStr;
+  saveMeuDia(); render();
+}
+
+// Drop na célula do dia na view Semana (faixa "dia todo")
+function meudiaDragDropWeekAllDay(date, e) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('meudia-drag-over');
+  var id = _meudiaDragId || e.dataTransfer.getData('text/plain');
+  if (!id) return;
+  var item = S.meudiaItems.find(function(x){ return x.id === id; });
+  if (!item) return;
+  item.date = date;
+  item.time = null;
+  saveMeuDia(); render();
+}
+
+// Drop na linha de hora na view Dia
+function meudiaDragDropHour(timeStr, e) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('meudia-drag-over');
+  var id = _meudiaDragId || e.dataTransfer.getData('text/plain');
+  if (!id) return;
+  var item = S.meudiaItems.find(function(x){ return x.id === id; });
+  if (!item) return;
+  item.time = timeStr;
+  saveMeuDia(); render();
+}
+
+// Drop na célula do mês
+function meudiaDragDropMonthCell(date, e) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('meudia-drag-over');
+  var id = _meudiaDragId || e.dataTransfer.getData('text/plain');
+  if (!id) return;
+  var item = S.meudiaItems.find(function(x){ return x.id === id; });
+  if (!item) return;
+  item.date = date;
+  saveMeuDia(); render();
+}
 function meudiaToggleItem(id) {
   const item = S.meudiaItems.find(x => x.id === id);
   if (item) { item.done = !item.done; saveMeuDia(); render(); }
@@ -3135,6 +3240,24 @@ function meudiaAddItem() {
   const titleEl = document.getElementById('meudia-inp-title');
   const title = titleEl ? titleEl.value.trim() : (m && m.title ? m.title.trim() : '');
   if (!title) { if(titleEl){titleEl.style.borderColor='#e74c3c'; titleEl.focus();} return; }
+
+  // EDIT MODE
+  if (m.editId) {
+    const item = S.meudiaItems.find(x => x.id === m.editId);
+    if (item) {
+      item.title = title;
+      item.date = m.date;
+      item.time = m.time || null;
+      item.project = m.project || null;
+      item.notes = m.notes || '';
+    }
+    saveMeuDia();
+    S.meudiaModal = null;
+    render();
+    return;
+  }
+
+  // ADD MODE
   S.meudiaItems.push({
     id: 'md_' + Date.now(),
     title,
@@ -3144,7 +3267,6 @@ function meudiaAddItem() {
     project: m.project || null,
     notes: m.notes || ''
   });
-  // If task linked to a project, also add as a project task
   if (m.project && m.addToProject) {
     const now = Date.now();
     S.tasks.push({id:now+'_md', title, description:'(via Meu Dia)', priority:'Média',
@@ -3244,10 +3366,10 @@ function renderMeuDiaDayView() {
         </div>`),
       ...noTime.map(item=>`
         <div class="meudia-quick-item${item.done?' done':''}">
-          <div class="meudia-item-checkbox${item.done?' checked':''}" onclick="meudiaToggleItem('${item.id}')">${item.done?'✓':''}</div>
-          <span class="meudia-item-title">${esc(item.title)}</span>
+          <div class="meudia-item-checkbox${item.done?' checked':''}" onclick="event.stopPropagation();meudiaToggleItem('${item.id}')">${item.done?'✓':''}</div>
+          <span class="meudia-item-title" onclick="meudiaOpenEdit('${item.id}')" style="cursor:pointer;">${esc(item.title)}</span>
           ${item.project?`<span class="meudia-item-proj">${esc(item.project)}</span>`:''}
-          <button class="meudia-item-del" onclick="meudiaDeleteItem('${item.id}')" title="Remover">✕</button>
+          <button class="meudia-item-del" onclick="event.stopPropagation();meudiaDeleteItem('${item.id}')" title="Remover">✕</button>
         </div>`)
     ].join('');
     noTimeHtml = `<div class="meudia-no-time">
@@ -3271,7 +3393,11 @@ function renderMeuDiaDayView() {
   let rows = '';
   for (let h = HOUR_START; h < HOUR_END; h++) {
     const label = h.toString().padStart(2,'0') + ':00';
-    rows += `<div class="meudia-tl-row" onclick="meudiaOpenAdd('${S.meudiaDate}','${label}')">
+    rows += `<div class="meudia-tl-row"
+        ondragover="meudiaDragOver(event)"
+        ondragleave="meudiaDragLeave(event)"
+        ondrop="meudiaDragDropHour('${label}',event)"
+        onclick="if(!_meudiaDragId)meudiaOpenAdd('${S.meudiaDate}','${label}')">
       <div class="meudia-tl-hour">${label}</div>
       <div class="meudia-tl-slot"></div>
     </div>`;
@@ -3306,14 +3432,18 @@ function renderMeuDiaDayView() {
     const startH = sh + sm/60;
     if (startH >= HOUR_END || startH < HOUR_START) return;
     const top = (startH - HOUR_START) * SLOT_H;
-    eventsHtml += `<div class="meudia-event personal${item.done?' done':''}" style="top:${top+2}px;height:50px;left:62px;right:8px;">
+    eventsHtml += `<div class="meudia-event personal${item.done?' done':''}" style="top:${top+2}px;height:50px;left:62px;right:8px;cursor:grab;"
+        draggable="true"
+        ondragstart="meudiaDragStart('${item.id}',event)"
+        ondragend="meudiaDragEnd(event)"
+        onclick="if(!event.target.closest('.meudia-item-checkbox,.meudia-item-del'))meudiaOpenEdit('${item.id}')">
       <div style="display:flex;align-items:center;gap:5px;">
-        <div class="meudia-item-checkbox${item.done?' checked':''}" onclick="meudiaToggleItem('${item.id}')" style="pointer-events:auto;">${item.done?'✓':''}</div>
+        <div class="meudia-item-checkbox${item.done?' checked':''}" onclick="event.stopPropagation();meudiaToggleItem('${item.id}')" style="pointer-events:auto;">${item.done?'✓':''}</div>
         <div>
           <div class="meudia-event-time">${item.time}${item.project?' · '+esc(item.project):''}</div>
           <div class="meudia-event-title">${esc(item.title)}</div>
         </div>
-        <button class="meudia-item-del" onclick="meudiaDeleteItem('${item.id}')" style="margin-left:auto;font-size:12px;pointer-events:auto;">✕</button>
+        <button class="meudia-item-del" onclick="event.stopPropagation();meudiaDeleteItem('${item.id}')" style="margin-left:auto;font-size:12px;pointer-events:auto;">✕</button>
       </div>
     </div>`;
   });
@@ -3355,10 +3485,15 @@ function renderMeuDiaWeekView() {
       return '<div class="meudia-tl-ad outlook" title="' + esc(e.subject||'') + '">' + esc(e.subject||'Evento') + '</div>';
     }).join('');
     adHtml += personal.filter(function(e){ return !e.time; }).map(function(e){
-      return '<div class="meudia-tl-ad personal' + (e.done?' done':'') + '" onclick="meudiaToggleItem(\'' + e.id + '\')" title="' + esc(e.title) + '">' + esc(e.title) + '</div>';
+      return '<div class="meudia-tl-ad personal' + (e.done?' done':'') + '"'
+        + ' draggable="true"'
+        + ' ondragstart="meudiaDragStart(\'' + e.id + '\',event)"'
+        + ' ondragend="meudiaDragEnd(event)"'
+        + ' onclick="meudiaOpenEdit(\'' + e.id + '\')" title="' + esc(e.title) + '">' + esc(e.title) + '</div>';
     }).join('');
     allDayCells += '<div class="meudia-tl-ad-cell">' + adHtml
-      + '<button class="meudia-tl-addday" onclick="meudiaOpenAdd(\'' + dateStr + '\',\'\')"  title="Adicionar">+</button></div>';
+      + '<div class="meudia-tl-ad-dropcell" ondragover="meudiaDragOver(event)" ondragleave="meudiaDragLeave(event)" ondrop="meudiaDragDropWeekAllDay(\'' + dateStr + '\',event)">'
+      + '<button class="meudia-tl-addday" onclick="meudiaOpenAdd(\'' + dateStr + '\',\'\')"  title="Adicionar">+</button></div></div>';
 
     // Timed events
     var evHtml = '';
@@ -3391,7 +3526,10 @@ function renderMeuDiaWeekView() {
       if (top < 0 || top >= TOTAL_H) return;
       var title = esc(e.title);
       evHtml += '<div class="meudia-tl-ev personal' + (e.done?' done':'') + '" style="top:' + top + 'px;height:28px;"'
-        + ' onclick="meudiaToggleItem(\'' + e.id + '\')" title="' + title + '">'
+        + ' draggable="true"'
+        + ' ondragstart="meudiaDragStart(\'' + e.id + '\',event)"'
+        + ' ondragend="meudiaDragEnd(event)"'
+        + ' onclick="meudiaOpenEdit(\'' + e.id + '\')" title="' + title + '">'
         + '<div class="meudia-tl-ev-time">' + e.time + '</div>'
         + '<div class="meudia-tl-ev-title">' + title + '</div>'
         + '</div>';
@@ -3404,7 +3542,9 @@ function renderMeuDiaWeekView() {
       hLines += '<div class="meudia-tl-hline half" style="top:' + ((h - START_HOUR) * HOUR_H + HOUR_H/2) + 'px;"></div>';
     }
 
-    dayCols += '<div class="meudia-tl-dcol' + (isToday?' today':'') + '" style="height:' + TOTAL_H + 'px;">'
+    dayCols += '<div class="meudia-tl-dcol' + (isToday?' today':'') + '" style="height:' + TOTAL_H + 'px;"'
+      + ' ondragover="meudiaDragOver(event)" ondragleave="meudiaDragLeave(event)"'
+      + ' ondrop="meudiaDragDropWeekCol(\'' + dateStr + '\',event)">'
       + hLines + evHtml + '</div>';
   }
 
@@ -3451,7 +3591,11 @@ function renderMeuDiaMonthView() {
   for (let i=0;i<startDow;i++) {
     const d = prevLastDay - startDow + 1 + i;
     const ds = `${prevY}-${String(prevM).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    cells += `<div class="meudia-month-cell other-month" onclick="meudiaSelectDate('${ds}')"><div class="meudia-month-num">${d}</div></div>`;
+    cells += `<div class="meudia-month-cell other-month"
+        ondragover="meudiaDragOver(event)"
+        ondragleave="meudiaDragLeave(event)"
+        ondrop="meudiaDragDropMonthCell('${ds}',event)"
+        onclick="if(!_meudiaDragId)meudiaSelectDate('${ds}')"><div class="meudia-month-num">${d}</div></div>`;
   }
   // Current month
   for (let d=1;d<=lastDay;d++) {
@@ -3459,14 +3603,21 @@ function renderMeuDiaMonthView() {
     const isToday = ds === todayStr;
     const {personal, outlook} = meudiaEventsForDate(ds);
     const allEvs = [
-      ...outlook.map(e=>({type:'outlook',label:e.subject||''})),
-      ...personal.map(e=>({type:'personal',label:e.title,done:e.done}))
+      ...outlook.map(e=>({type:'outlook',label:e.subject||'',id:null})),
+      ...personal.map(e=>({type:'personal',label:e.title,done:e.done,id:e.id}))
     ];
     const shown = allEvs.slice(0,3);
     const more = allEvs.length - 3;
-    cells += `<div class="meudia-month-cell${isToday?' today-cell':''}" onclick="meudiaSelectDate('${ds}')">
+    cells += `<div class="meudia-month-cell${isToday?' today-cell':''}"
+        ondragover="meudiaDragOver(event)"
+        ondragleave="meudiaDragLeave(event)"
+        ondrop="meudiaDragDropMonthCell('${ds}',event)"
+        onclick="if(!_meudiaDragId)meudiaSelectDate('${ds}')">
       <div class="meudia-month-num${isToday?' today':''}">${d}</div>
-      ${shown.map(e=>`<div class="meudia-month-event ${e.type}${e.done?' done':''}">${esc(e.label)}</div>`).join('')}
+      ${shown.map(e=>e.type==='personal'
+        ? `<div class="meudia-month-event personal${e.done?' done':''}" draggable="true" ondragstart="meudiaDragStart('${e.id}',event)" ondragend="meudiaDragEnd(event)" onclick="event.stopPropagation();meudiaOpenEdit('${e.id}')">${esc(e.label)}</div>`
+        : `<div class="meudia-month-event ${e.type}${e.done?' done':''}">${esc(e.label)}</div>`
+      ).join('')}
       ${more>0?`<div class="meudia-month-more">+${more}</div>`:''}
     </div>`;
   }
@@ -3476,7 +3627,11 @@ function renderMeuDiaMonthView() {
   const nextM = month===12?1:month+1, nextY = month===12?year+1:year;
   for (let d=1;d<=remainder;d++) {
     const ds = `${nextY}-${String(nextM).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    cells += `<div class="meudia-month-cell other-month" onclick="meudiaSelectDate('${ds}')"><div class="meudia-month-num">${d}</div></div>`;
+    cells += `<div class="meudia-month-cell other-month"
+        ondragover="meudiaDragOver(event)"
+        ondragleave="meudiaDragLeave(event)"
+        ondrop="meudiaDragDropMonthCell('${ds}',event)"
+        onclick="if(!_meudiaDragId)meudiaSelectDate('${ds}')"><div class="meudia-month-num">${d}</div></div>`;
   }
   return `<div class="meudia-month-wrap">
     <div class="meudia-month-header">${headerHtml}</div>
@@ -3492,7 +3647,7 @@ function renderMeuDiaModal() {
   return `<div class="modal-overlay open" onclick="if(event.target===this)meudiaCloseModal()">
     <div class="modal-box narrow">
       <div class="modal-header">
-        <span style="font-weight:800;font-size:15px;color:#001a70;">+ Nova atividade</span>
+        <span style="font-weight:800;font-size:15px;color:#001a70;">${m.editId ? '✏️ Editar atividade' : '+ Nova atividade'}</span>
         <button onclick="meudiaCloseModal()" style="background:none;border:none;font-size:22px;color:#7A9BB5;cursor:pointer;line-height:1;">×</button>
       </div>
       <label class="form-label">Descrição *</label>
@@ -3518,9 +3673,12 @@ function renderMeuDiaModal() {
       <label class="form-label">Notas (opcional)</label>
       <textarea class="form-textarea" rows="2" oninput="S.meudiaModal.notes=this.value"
         placeholder="Contexto, links, observações..." style="min-height:56px;margin-bottom:16px;">${esc(m.notes||'')}</textarea>
-      <div style="display:flex;justify-content:flex-end;gap:10px;">
-        <button class="btn-cancel" onclick="meudiaCloseModal()">Cancelar</button>
-        <button class="btn-save" onclick="meudiaAddItem()">Salvar</button>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+        <div>${m.editId ? `<button onclick="meudiaDeleteItem(m.editId)" style="background:none;border:1px solid #e74c3c;color:#e74c3c;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;">🗑 Excluir</button>` : ''}</div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn-cancel" onclick="meudiaCloseModal()">Cancelar</button>
+          <button class="btn-save" onclick="meudiaAddItem()">\${m.editId ? 'Salvar alterações' : 'Salvar'}</button>
+        </div>
       </div>
     </div>
   </div>`;
