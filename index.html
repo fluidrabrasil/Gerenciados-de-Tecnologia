@@ -238,20 +238,20 @@ input,select,textarea{font-family:inherit;color:#001a70;}
 .home-logo{height:36px;width:auto;}
 .home-brand{color:#fff;font-weight:700;font-size:17px;letter-spacing:.3px;}
 .home-brand-sub{color:#7EB8E0;font-size:13px;margin-left:2px;}
-.home-hero{padding:48px 36px 32px;max-width:900px;}
-.home-hero-title{font-size:30px;font-weight:800;color:#001a70;line-height:1.2;margin-bottom:10px;}
-.home-hero-sub{font-size:15px;color:#5A7A90;line-height:1.5;}
+.home-hero{padding:24px 36px 18px;max-width:900px;}
+.home-hero-title{font-size:22px;font-weight:800;color:#001a70;line-height:1.2;margin-bottom:6px;}
+.home-hero-sub{font-size:12px;color:#5A7A90;line-height:1.4;}
 .home-section-label{padding:0 36px;font-size:11px;font-weight:700;color:#001a70;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px;opacity:0.6;}
-.home-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,280px));gap:18px;padding:0 36px 48px;}
+.home-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,280px));gap:10px;padding:0 36px 24px;}
 .tool-card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 12px rgba(0,26,112,.08);border:1.5px solid #dddce8;transition:all .2s;cursor:default;display:flex;flex-direction:column;}
 .tool-card:hover{box-shadow:0 6px 24px rgba(0,26,112,.16);transform:translateY(-2px);border-color:#8393ff;}
-.tool-card-banner{height:72px;display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0;}
-.tool-card-body{padding:16px 18px;flex:1;display:flex;flex-direction:column;}
-.tool-card-title{font-size:15px;font-weight:700;color:#001a70;margin-bottom:5px;}
-.tool-card-desc{font-size:12px;color:#7A9BB5;line-height:1.5;flex:1;margin-bottom:14px;}
+.tool-card-banner{height:44px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.tool-card-body{padding:10px 14px;flex:1;display:flex;flex-direction:column;}
+.tool-card-title{font-size:13px;font-weight:700;color:#001a70;margin-bottom:3px;}
+.tool-card-desc{font-size:11px;color:#7A9BB5;line-height:1.4;flex:1;margin-bottom:8px;}
 .tool-card-footer{display:flex;align-items:center;justify-content:space-between;}
 .tool-card-stats{font-size:11px;color:#A0B8CC;}
-.tool-card-btn{background:#001a70;color:#fff;border:none;border-radius:7px;padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer;transition:background .15s;}
+.tool-card-btn{background:#001a70;color:#fff;border:none;border-radius:7px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;transition:background .15s;}
 .tool-card-btn:hover{background:#2a3db0;}
 .tool-card-soon{background:#F0F5FA;color:#B0C8D8;border:none;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:600;cursor:default;}
 
@@ -3179,7 +3179,7 @@ function meudiaDragDropWeekCol(date, e) {
   var absHour = Math.floor(START_HOUR + totalMins / 60);
   var minsFrac = totalMins % 60;
   var snappedMins = minsFrac < 15 ? 0 : minsFrac < 45 ? 30 : 0;
-  var finalH = Math.max(START_HOUR, Math.min(absHour + (snappedMins === 0 && minsFrac >= 45 ? 1 : 0), 17));
+  var finalH = Math.max(START_HOUR, Math.min(absHour + (snappedMins === 0 && minsFrac >= 45 ? 1 : 0), 19));
   var timeStr = (finalH < 10 ? '0' : '') + finalH + ':' + (snappedMins < 10 ? '0' : '') + snappedMins;
   item.date = date;
   item.time = timeStr;
@@ -3465,7 +3465,7 @@ function renderMeuDiaDayView() {
 }
 
 function renderMeuDiaWeekView() {
-  var START_HOUR = 7, END_HOUR = 18, HOUR_H = 48;
+  var START_HOUR = 7, END_HOUR = 20, HOUR_H = 48;
   var TOTAL_H = (END_HOUR - START_HOUR) * HOUR_H;
   var DOWS = ['Seg','Ter','Qua','Qui','Sex','Sab','Dom'];
   var ws = meudiaGetWeekStart(S.meudiaDate);
