@@ -859,24 +859,36 @@ function badgeHtml(text, colors) {
 
 // ─── RENDER ───────────────────────────────────────────────────────────────────
 function render() {
-  const app = document.getElementById("app");
-  if(S.page==="home") {
-    app.innerHTML = renderHome();
-    setTimeout(refreshComprasStat, 0);
-  } else if(S.ataProject !== null) {
-    app.innerHTML = renderAtaPage();
-  } else if(S.page==="inventory") {
-    app.innerHTML = renderInventory();
-  } else if(S.page==="compras") {
-    app.innerHTML = renderCompras();
-  } else if(S.page==="discovery") {
-    app.innerHTML = renderDiscovery();
-  } else if(S.page==="meudia") {
-    app.innerHTML = renderMeuDia();
-  } else {
-    app.innerHTML = renderMain();
+  try {
+    const app = document.getElementById("app");
+    if(S.page==="home") {
+      app.innerHTML = renderHome();
+      setTimeout(refreshComprasStat, 0);
+    } else if(S.ataProject !== null) {
+      app.innerHTML = renderAtaPage();
+    } else if(S.page==="inventory") {
+      app.innerHTML = renderInventory();
+    } else if(S.page==="compras") {
+      app.innerHTML = renderCompras();
+    } else if(S.page==="discovery") {
+      app.innerHTML = renderDiscovery();
+    } else if(S.page==="meudia") {
+      app.innerHTML = renderMeuDia();
+    } else {
+      app.innerHTML = renderMain();
+    }
+    attachEvents();
+  } catch(err) {
+    document.getElementById("app").innerHTML =
+      '<div style="padding:40px;font-family:sans-serif;color:#C0392B;">'
+      + '<h2>Erro ao renderizar</h2>'
+      + '<pre style="background:#FDE8E8;padding:16px;border-radius:8px;white-space:pre-wrap;">'
+      + (err && err.stack ? err.stack : String(err))
+      + '</pre>'
+      + '<p style="color:#555;">Abra o console do navegador (F12) para mais detalhes.</p>'
+      + '</div>';
+    console.error('render() error:', err);
   }
-  attachEvents();
 }
 
 function renderHeader() {
@@ -3333,7 +3345,7 @@ function renderMeuDiaWeekView() {
     var personal = evData.personal, outlook = evData.outlook;
 
     // Header
-    headerCells += '<div class="meudia-tl-hdr' + (isToday ? ' today' : '') + '" onclick="meudiaSelectDate('' + dateStr + '')">'
+    headerCells += '<div class="meudia-tl-hdr' + (isToday ? ' today' : '') + '" onclick="meudiaSelectDate(\'' + dateStr + '\')">'
       + '<div class="meudia-tl-dow">' + DOWS[i] + '</div>'
       + '<div class="meudia-tl-dnum' + (isToday ? ' today' : '') + '">' + d.getDate() + '</div>'
       + '</div>';
@@ -3343,10 +3355,10 @@ function renderMeuDiaWeekView() {
       return '<div class="meudia-tl-ad outlook" title="' + esc(e.subject||'') + '">' + esc(e.subject||'Evento') + '</div>';
     }).join('');
     adHtml += personal.filter(function(e){ return !e.time; }).map(function(e){
-      return '<div class="meudia-tl-ad personal' + (e.done?' done':'') + '" onclick="meudiaToggleItem('' + e.id + '')" title="' + esc(e.title) + '">' + esc(e.title) + '</div>';
+      return '<div class="meudia-tl-ad personal' + (e.done?' done':'') + '" onclick="meudiaToggleItem(\'' + e.id + '\')" title="' + esc(e.title) + '">' + esc(e.title) + '</div>';
     }).join('');
     allDayCells += '<div class="meudia-tl-ad-cell">' + adHtml
-      + '<button class="meudia-tl-addday" onclick="meudiaOpenAdd('' + dateStr + '','')" title="Adicionar">+</button></div>';
+      + '<button class="meudia-tl-addday" onclick="meudiaOpenAdd(\'' + dateStr + '\',\'\')"  title="Adicionar">+</button></div>';
 
     // Timed events
     var evHtml = '';
@@ -3366,7 +3378,7 @@ function renderMeuDiaWeekView() {
       var subj = esc(e.subject || 'Reuniao');
       var timeLabel = st + (et ? '–' + et : '');
       evHtml += '<div class="meudia-tl-ev outlook" style="top:' + top + 'px;height:' + height + 'px;"'
-        + ' onclick="window.open('' + (e.webLink||'#') + '','_blank')" title="' + subj + '">'
+        + ' onclick="window.open(\'' + (e.webLink||'#') + '\',\'_blank\')" title="' + subj + '">'
         + '<div class="meudia-tl-ev-time">' + timeLabel + '</div>'
         + '<div class="meudia-tl-ev-title">' + subj + '</div>'
         + '</div>';
@@ -3379,7 +3391,7 @@ function renderMeuDiaWeekView() {
       if (top < 0 || top >= TOTAL_H) return;
       var title = esc(e.title);
       evHtml += '<div class="meudia-tl-ev personal' + (e.done?' done':'') + '" style="top:' + top + 'px;height:28px;"'
-        + ' onclick="meudiaToggleItem('' + e.id + '')" title="' + title + '">'
+        + ' onclick="meudiaToggleItem(\'' + e.id + '\')" title="' + title + '">'
         + '<div class="meudia-tl-ev-time">' + e.time + '</div>'
         + '<div class="meudia-tl-ev-title">' + title + '</div>'
         + '</div>';
