@@ -1618,10 +1618,16 @@ function renderHome() {
       <div class="home-hero-title">Gestor de Tecnologia</div>
       <div class="home-hero-sub">Central de ferramentas do time de TI da Fluidra Brasil · ${cap(today)}</div>
     </div>
-    <div class="home-section-label">Ferramentas disponíveis</div>
-    <div class="home-grid">${cards}</div>
-    <div class="home-section-label" style="margin-top:28px;padding-bottom:0;">⚡ Atualização Power BI</div>
-    <div style="padding:0 36px 48px;"><div class="pbi-widget" id="pbi-widget">${buildPbiWidgetHtml()}</div></div>
+    <div style="display:flex;gap:20px;padding:0 36px 48px;align-items:flex-start;">
+      <div style="flex:1;min-width:0;">
+        <div class="home-section-label" style="padding:0;margin-bottom:14px;">Ferramentas disponíveis</div>
+        <div class="home-grid" style="padding:0;grid-template-columns:repeat(2,1fr);">${cards}</div>
+      </div>
+      <div style="width:390px;flex-shrink:0;">
+        <div class="home-section-label" style="padding:0;margin-bottom:14px;">⚡ Atualização Power BI</div>
+        <div class="pbi-widget" id="pbi-widget">${buildPbiWidgetHtml()}</div>
+      </div>
+    </div>
   </div>`;
 }
 
@@ -1696,7 +1702,7 @@ function attachGanttSlider() {
 
 // ─── ACTIONS ──────────────────────────────────────────────────────────────────
 function goHome()               { S.page="home"; S.ataProject=null; render(); }
-function goProjects()           { S.page="projects"; S.ataProject=null; render(); }
+function goProjects()           { S.page="projects"; S.view="executive"; S.ataProject=null; render(); }
 function goInventory(){ S.page="inventory"; S.invTab="dashboard"; S.invSearch=""; S.invPassVisible=false; render(); }
 function goCompras(){ S.page="compras"; S.comprasView="kanban"; S.comprasModal=null; render(); }
 function setView(v)             { S.view=v; S.page="projects"; render(); }
@@ -2817,7 +2823,7 @@ function renderComprasModal(modal,purchases) {
 
 // ── DISCOVERY ─────────────────────────────────────────────────────────────────
 function goDiscovery() { S.page="discovery"; render(); }
-function goMeuDia(){ S.page='meudia'; S.meudiaDate=new Date().toISOString().split('T')[0]; render(); meudiaFetchForCurrentView(); }
+function goMeuDia(){ S.page='meudia'; S.meudiaView='semana'; S.meudiaDate=new Date().toISOString().split('T')[0]; render(); meudiaFetchForCurrentView(); }
 
 function renderDiscovery() {
   const items = S.discovery;
@@ -3568,7 +3574,7 @@ function renderMeuDiaWeekView() {
   return '<div class="meudia-tl-wrap">'
     + '<div class="meudia-tl-header"><div class="meudia-tl-corner"></div>' + headerCells + '</div>'
     + '<div class="meudia-tl-allday"><div class="meudia-tl-ad-label">Dia todo</div>' + allDayCells + '</div>'
-    + '<div class="meudia-tl-body">'
+    + '<div class="meudia-tl-body" style="height:' + TOTAL_H + 'px;">'
     +   '<div class="meudia-tl-timecol" style="height:' + TOTAL_H + 'px;">' + timeLabels + '</div>'
     +   '<div class="meudia-tl-daysarea" style="height:' + TOTAL_H + 'px;">' + dayCols + nowLine + '</div>'
     + '</div>'
