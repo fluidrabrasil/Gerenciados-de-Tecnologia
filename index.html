@@ -893,19 +893,32 @@ function serializeAll() {
   };
 }
 
+var _syncDebounceTimer = null;
+var _syncInFlight = false;
+
 async function syncToSharePoint() {
-  try {
-    await fetch(WRITE_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(serializeAll())
-    });
-  } catch(e) {
-    console.warn('[GTI] Falha ao sincronizar com SharePoint:', e);
-  }
+  // Sinaliza imediatamente que há escrita pendente
+  _syncInFlight = true;
+  clearTimeout(_syncDebounceTimer);
+  _syncDebounceTimer = setTimeout(async function() {
+    try {
+      await fetch(WRITE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(serializeAll())
+      });
+    } catch(e) {
+      console.warn('[GTI] Falha ao sincronizar com SharePoint:', e);
+    } finally {
+      _syncInFlight = false;
+      _syncDebounceTimer = null;
+    }
+  }, 1500);
 }
 
 async function loadFromSharePoint() {
+  // Não sobrescreve dados locais enquanto há uma escrita pendente ou em andamento
+  if (_syncInFlight || _syncDebounceTimer) return;
   try {
     const resp = await fetch(READ_URL, { method: 'POST' });
     if (!resp.ok) return;
