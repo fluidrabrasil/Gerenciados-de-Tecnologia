@@ -2864,8 +2864,10 @@ function saveEditarCompra(id) {
 function saveAvancarCaminho(id) {
   const loja=document.getElementById('ac-loja')?.value?.trim();
   if(!loja){alert('Informe a loja.');return;}
+  const dataEntrega=document.getElementById('ac-data')?.value||'';
+  if(!dataEntrega){alert('Informe a previsão de entrega.');return;}
   const arr=loadCompras(), p=arr.find(x=>x.id===id); if(!p) return;
-  Object.assign(p,{phase:'caminho',loja,dataEntregaPrev:document.getElementById('ac-data')?.value||'',atualizadoEm:new Date().toISOString()});
+  Object.assign(p,{phase:'caminho',loja,dataEntregaPrev:dataEntrega,atualizadoEm:new Date().toISOString()});
   if(_compPendingFile){p.nfAnexoName=_compPendingFile.name;p.nfAnexoData=_compPendingFile.data;_compPendingFile=null;}
   saveCompras(arr); S.comprasModal=null; render();
 }
@@ -2875,6 +2877,20 @@ function saveAvancarRecebido(id) {
   p.phase='recebido'; p.atualizadoEm=new Date().toISOString();
   if(_compPendingFile){p.nfAnexoName=_compPendingFile.name;p.nfAnexoData=_compPendingFile.data;_compPendingFile=null;}
   saveCompras(arr); S.comprasModal=null; render();
+}
+function avancarParaLancamento(id) { S.comprasModal={type:'lancamento_nf',purchaseId:id}; render(); }
+function saveAvancarLancamento(id) {
+  const pedido=document.getElementById('nf-pedido')?.value?.trim();
+  if(!pedido){alert('Informe o número do pedido de compra.');return;}
+  const arr=loadCompras(), p=arr.find(x=>x.id===id); if(!p) return;
+  Object.assign(p,{phase:'lancamento_nf',numeroPedido:pedido,atualizadoEm:new Date().toISOString()});
+  saveCompras(arr); S.comprasModal=null; render();
+}
+function concluirLancamento(id) {
+  if(!confirm('Concluir e mover para o Histórico?')) return;
+  const arr=loadCompras(), p=arr.find(x=>x.id===id); if(!p) return;
+  Object.assign(p,{phase:'finalizado',nfLancada:true,atualizadoEm:new Date().toISOString()});
+  saveCompras(arr); render();
 }
 
 function saveFinalizarCompra(id) {
@@ -2906,10 +2922,11 @@ function attachCompraFile() {
 function renderCompras() {
   const purchases=loadCompras();
   const byPhase={
-    necessidade:purchases.filter(p=>p.phase==='necessidade'),
-    caminho:    purchases.filter(p=>p.phase==='caminho'),
-    recebido:   purchases.filter(p=>p.phase==='recebido'),
-    finalizado: purchases.filter(p=>p.phase==='finalizado'),
+    necessidade:   purchases.filter(p=>p.phase==='necessidade'),
+    caminho:       purchases.filter(p=>p.phase==='caminho'),
+    recebido:      purchases.filter(p=>p.phase==='recebido'),
+    lancamento_nf: purchases.filter(p=>p.phase==='lancamento_nf'),
+    finalizado:    purchases.filter(p=>p.phase==='finalizado'),
   };
 
   const header=`<div id="header" style="background:#001a70;height:56px;padding:0 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;">
@@ -2935,10 +2952,11 @@ function renderCompras() {
 function renderComprasDashboard(bp) {
   const total=bp.necessidade.length+bp.caminho.length+bp.recebido.length+bp.finalizado.length;
   const stats=[
-    {label:'Necessidades',count:bp.necessidade.length,color:'#8393ff',bg:'#eef0ff',icon:'📋'},
-    {label:'A Caminho',   count:bp.caminho.length,    color:'#E67E22',bg:'#FEF0E7',icon:'🚚'},
-    {label:'Recebidos',   count:bp.recebido.length,   color:'#27AE60',bg:'#E9F7EF',icon:'📥'},
-    {label:'Finalizados', count:bp.finalizado.length, color:'#7A9BB5',bg:'#f0f5fa',icon:'✅'},
+    {label:'Necessidades',  count:bp.necessidade.length,   color:'#8393ff',bg:'#eef0ff',icon:'📋'},
+    {label:'A Caminho',     count:bp.caminho.length,       color:'#E67E22',bg:'#FEF0E7',icon:'🚚'},
+    {label:'Recebidos',     count:bp.recebido.length,      color:'#27AE60',bg:'#E9F7EF',icon:'📥'},
+    {label:'Lançamento NF', count:bp.lancamento_nf.length, color:'#7E57C2',bg:'#EDE7F6',icon:'🧾'},
+    {label:'Histórico',     count:bp.finalizado.length,    color:'#7A9BB5',bg:'#f0f5fa',icon:'✅'},
   ];
   const cards=stats.map(s=>`
     <div style="background:#fff;border-radius:12px;padding:18px 22px;display:flex;align-items:center;gap:14px;border:1.5px solid #dddce8;box-shadow:0 2px 8px rgba(0,26,112,.06);">
@@ -2988,11 +3006,35 @@ function renderComprasDashboard(bp) {
   </div>`;
 }
 
+var _compDragId = null;
+function compDragStart(id, e) { _compDragId = id; e.dataTransfer.effectAllowed = 'move'; }
+function compDragOver(e) { e.preventDefault(); e.currentTarget.style.outline = '2.5px dashed #8393ff'; }
+function compDragLeave(e) { e.currentTarget.style.outline = ''; }
+function compDrop(targetPhase, e) {
+  e.preventDefault();
+  e.currentTarget.style.outline = '';
+  var id = _compDragId || e.dataTransfer.getData('text/plain');
+  _compDragId = null;
+  if (!id) return;
+  var arr = loadCompras();
+  var p = arr.find(function(x){ return x.id === id; });
+  if (!p || p.phase === targetPhase) return;
+  if (targetPhase === 'caminho') { avancarParaCaminho(id); return; }
+  if (targetPhase === 'recebido') { avancarParaRecebido(id); return; }
+  if (targetPhase === 'lancamento_nf') { avancarParaLancamento(id); return; }
+  if (targetPhase === 'necessidade') {
+    if (!confirm('Mover de volta para Necessidade de Compra?')) return;
+    p.phase = 'necessidade'; p.atualizadoEm = new Date().toISOString();
+    saveCompras(arr); render();
+  }
+}
+
 function renderComprasKanban(bp) {
   const cols=[
-    {id:'necessidade',label:'📋 Necessidade de Compra',color:'#8393ff',bg:'#eef0ff',items:bp.necessidade},
-    {id:'caminho',    label:'🚚 Equipamento a Caminho', color:'#E67E22',bg:'#FEF0E7',items:bp.caminho},
-    {id:'recebido',   label:'📥 Equipamento Recebido',  color:'#27AE60',bg:'#E9F7EF',items:bp.recebido},
+    {id:'necessidade',   label:'📋 Necessidade de Compra',color:'#8393ff',bg:'#eef0ff',items:bp.necessidade},
+    {id:'caminho',       label:'🚚 Equipamento a Caminho', color:'#E67E22',bg:'#FEF0E7',items:bp.caminho},
+    {id:'recebido',      label:'📥 Equipamento Recebido',  color:'#27AE60',bg:'#E9F7EF',items:bp.recebido},
+    {id:'lancamento_nf', label:'🧾 Lançamento de NF',      color:'#7E57C2',bg:'#EDE7F6',items:bp.lancamento_nf},
   ];
   const colsHtml=cols.map(col=>{
     const cards=col.items.map(p=>renderCompraCard(p,col.id)).join('');
@@ -3001,7 +3043,8 @@ function renderComprasKanban(bp) {
         <span style="font-size:13px;font-weight:700;color:${col.color};">${col.label}</span>
         <span style="background:${col.color};color:#fff;border-radius:10px;padding:1px 8px;font-size:11px;font-weight:700;">${col.items.length}</span>
       </div>
-      <div style="background:#fff;border-radius:0 0 10px 10px;border:1.5px solid #dddce8;border-top:none;padding:10px;min-height:80px;max-height:calc(100vh - 340px);overflow-y:auto;">
+      <div ondragover="compDragOver(event)" ondragleave="compDragLeave(event)" ondrop="compDrop('${col.id}',event)"
+        style="background:#fff;border-radius:0 0 10px 10px;border:1.5px solid #dddce8;border-top:none;padding:10px;min-height:80px;max-height:calc(100vh - 340px);overflow-y:auto;transition:outline .1s;">
         ${cards||'<div style="text-align:center;padding:20px;color:#B0C8D8;font-size:12px;">Nenhum item nesta fase.</div>'}
       </div>
     </div>`;
@@ -3037,10 +3080,16 @@ function renderCompraCard(p,phase) {
   } else if(phase==='recebido'){
     if(p.loja) phaseInfo+=`<div style="font-size:11px;color:#7A9BB5;margin-top:4px;">🏪 ${p.loja}</div>`;
     if(p.nfAnexoName) phaseInfo+=`<div style="font-size:11px;color:#27AE60;margin-top:3px;">📎 ${p.nfAnexoName}</div>`;
-    actionBtn=`<button onclick="openFinalizarCompra('${p.id}')" style="background:#8393ff;color:#fff;border:none;border-radius:6px;padding:6px 10px;font-size:11px;font-weight:700;cursor:pointer;width:100%;margin-top:8px;">🏁 Finalizar Compra</button>`;
+    actionBtn=`<button onclick="avancarParaLancamento('${p.id}')" style="background:#7E57C2;color:#fff;border:none;border-radius:6px;padding:6px 10px;font-size:11px;font-weight:700;cursor:pointer;width:100%;margin-top:8px;">🧾 Lançar NF</button>`;
   }
 
-  return `<div style="background:#fff;border-radius:8px;padding:12px;border:1.5px solid #eee;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,26,112,.06);">
+  } else if(phase==='lancamento_nf'){
+    if(p.loja) phaseInfo+=`<div style="font-size:11px;color:#7A9BB5;margin-top:4px;">🏪 ${p.loja}</div>`;
+    if(p.numeroPedido) phaseInfo+=`<div style="font-size:12px;color:#7E57C2;font-weight:700;margin-top:5px;">📄 Pedido: ${p.numeroPedido}</div>`;
+    actionBtn=`<button onclick="concluirLancamento('${p.id}')" style="background:#27AE60;color:#fff;border:none;border-radius:6px;padding:6px 10px;font-size:11px;font-weight:700;cursor:pointer;width:100%;margin-top:8px;">✅ Concluir</button>`;
+  }
+
+  return `<div draggable="true" ondragstart="compDragStart('${p.id}',event)" style="background:#fff;border-radius:8px;padding:12px;border:1.5px solid #eee;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,26,112,.06);cursor:grab;">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
       <span style="background:${ub[urg]};color:${uc[urg]};border-radius:4px;padding:1px 7px;font-size:10px;font-weight:700;">${urg}</span>
       <div>
@@ -3130,7 +3179,7 @@ function renderComprasModal(modal,purchases) {
     inner=`${HDR('🛒 Registrar Compra')}
       <div style="background:#FEF0E7;border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:#E67E22;font-weight:600;">${p.equipamento} <span style="font-weight:400;">— Qtd: ${p.quantidade}</span></div>
       <div style="margin-bottom:12px;">${FLD('Loja / Fornecedor',true)}<input id="ac-loja" class="form-input" placeholder="Ex: Kabum, Amazon, Pichau, Mercado Livre..."></div>
-      <div style="margin-bottom:16px;">${FLD('Data Prevista de Entrega')}<input id="ac-data" class="form-input" type="date"></div>
+      <div style="margin-bottom:16px;">${FLD('Data Prevista de Entrega',true)}<input id="ac-data" class="form-input" type="date"></div>
       ${fileBtn}
       <div style="display:flex;justify-content:flex-end;gap:10px;">
         <button onclick="closeComprasModal()" class="btn-cancel">Cancelar</button>
@@ -3150,6 +3199,18 @@ function renderComprasModal(modal,purchases) {
         <button onclick="closeComprasModal()" class="btn-cancel">Cancelar</button>
         <button onclick="saveAvancarRecebido('${p.id}')" style="background:#27AE60;color:#fff;border:none;border-radius:6px;padding:8px 22px;font-size:13px;font-weight:700;cursor:pointer;">Confirmar Recebimento →</button>
       </div>`;
+
+  } else if(modal.type==='lancamento_nf'){
+    const p=purchases.find(x=>x.id===modal.purchaseId)||{};
+    inner=HDR('🧾 Lançamento de NF')
+      +'<div style="background:#EDE7F6;border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:#7E57C2;font-weight:600;">'
+      +esc(p.equipamento||'')+'<span style="font-weight:400;"> — Qtd: '+p.quantidade+'</span></div>'
+      +FLD('Número do Pedido de Compra',true)
+      +'<input id="nf-pedido" class="form-input" placeholder="Ex: PC-2025-042" value="'+(p.numeroPedido||'').replace(/"/g,'&quot;')+'" style="margin-bottom:20px;">'
+      +'<div style="display:flex;justify-content:flex-end;gap:10px;">'
+      +'<button onclick="closeComprasModal()" class="btn-cancel">Cancelar</button>'
+      +'<button onclick="saveAvancarLancamento(''+p.id+'')" style="background:#7E57C2;color:#fff;border:none;border-radius:6px;padding:8px 22px;font-size:13px;font-weight:700;cursor:pointer;">Confirmar Lançamento →</button>'
+      +'</div>';
 
   } else if(modal.type==='finalizar'){
     const p=purchases.find(x=>x.id===modal.purchaseId)||{};
