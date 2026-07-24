@@ -446,7 +446,7 @@ input,select,textarea{font-family:inherit;color:#001a70;}
 .meudia-tl-ev.personal{background:#f0f2ff;border-left-color:#8393ff;}
 .meudia-tl-ev.done{background:#EDFAF3;border-left-color:#27AE60;}
 .meudia-tl-ev-time{font-size:9px;color:#7A9BB5;font-weight:700;white-space:nowrap;overflow:hidden;}
-.meudia-tl-ev-title{font-size:10px;font-weight:700;color:#001a70;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.meudia-tl-ev-title{font-size:10px;font-weight:700;color:#001a70;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;}
 .meudia-tl-ev.done .meudia-tl-ev-title{color:#27AE60;text-decoration:line-through;}
 .meudia-tl-nowline{position:absolute;left:0;right:0;height:2px;background:#E53935;z-index:10;pointer-events:none;}
 .meudia-tl-nowline::before{content:'';position:absolute;left:-4px;top:-3px;width:8px;height:8px;background:#E53935;border-radius:50%;}
@@ -2981,7 +2981,7 @@ function renderComprasDashboard(bp) {
   }).sort((a,b)=>a.dataEntregaPrev.localeCompare(b.dataEntregaPrev));
   const entregasHtml=proximas.length?proximas.map(p=>{
     const d=new Date(p.dataEntregaPrev+'T12:00:00');
-    const diff=Math.round((d-_hoje3)/86400000);
+    const diff=Math.floor((d-_hoje3)/86400000);
     const cor=diff<=1?'#E67E22':'#27AE60';
     const label=diff===0?'hoje':diff===1?'amanhã':`em ${diff}d`;
     return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f0eee8;">
@@ -4067,8 +4067,40 @@ function renderMeuDiaDayView() {
     </div>`;
 }
 
+function layoutMeuDiaEvents(evs) {
+  if (!evs.length) return;
+  evs.sort(function(a,b){ return a.startMins!==b.startMins?a.startMins-b.startMins:b.endMins-a.endMins; });
+  var visited = evs.map(function(){ return false; });
+  for (var i = 0; i < evs.length; i++) {
+    if (visited[i]) continue;
+    var cluster = [i]; visited[i] = true;
+    var qi = 0;
+    while (qi < cluster.length) {
+      var cur = cluster[qi];
+      for (var j = 0; j < evs.length; j++) {
+        if (!visited[j] && evs[cur].startMins < evs[j].endMins && evs[cur].endMins > evs[j].startMins) {
+          visited[j] = true; cluster.push(j);
+        }
+      }
+      qi++;
+    }
+    var cevs = cluster.map(function(idx){ return evs[idx]; });
+    cevs.sort(function(a,b){ return a.startMins!==b.startMins?a.startMins-b.startMins:b.endMins-a.endMins; });
+    var cols = [];
+    cevs.forEach(function(ev) {
+      var placed = false;
+      for (var c2 = 0; c2 < cols.length; c2++) {
+        var ok = !cols[c2].some(function(o){ return o.startMins < ev.endMins && o.endMins > ev.startMins; });
+        if (ok) { cols[c2].push(ev); ev._col = c2; placed = true; break; }
+      }
+      if (!placed) { ev._col = cols.length; cols.push([ev]); }
+    });
+    cevs.forEach(function(ev){ ev._numCols = cols.length; });
+  }
+}
+
 function renderMeuDiaWeekView() {
-  var START_HOUR = 7, END_HOUR = 20, HOUR_H = 48;
+  var START_HOUR = 7, END_HOUR = 20, HOUR_H = 56;
   var TOTAL_H = (END_HOUR - START_HOUR) * HOUR_H;
   var DOWS = ['Seg','Ter','Qua','Qui','Sex','Sab','Dom'];
   var ws = meudiaGetWeekStart(S.meudiaDate);
@@ -4076,7 +4108,7 @@ function renderMeuDiaWeekView() {
 
   var headerCells = '', allDayCells = '', dayCols = '';
 
-  for (var i = 0; i < 6; i++) {   // 6 dias: Seg-Sab (Dom oculto)
+  for (var i = 0; i < 6; i++) {
     var d = new Date(ws + 'T12:00:00'); d.setDate(d.getDate() + i);
     var dateStr = d.toISOString().split('T')[0];
     var isToday = dateStr === todayStr;
@@ -4102,49 +4134,68 @@ function renderMeuDiaWeekView() {
     }).join('');
     allDayCells += '<div class="meudia-tl-ad-cell">' + adHtml
       + '<div class="meudia-tl-ad-dropcell" ondragover="meudiaDragOver(event)" ondragleave="meudiaDragLeave(event)" ondrop="meudiaDragDropWeekAllDay(\'' + dateStr + '\',event)">'
-      + '<button class="meudia-tl-addday" onclick="meudiaOpenAdd(\'' + dateStr + '\',\'\')"  title="Adicionar">+</button></div></div>';
+      + '<button class="meudia-tl-addday" onclick="meudiaOpenAdd(\'' + dateStr + '\')" title="Adicionar">+</button></div></div>';
 
-    // Timed events
-    var evHtml = '';
+    // ── Coletar todos os eventos com horário e calcular layout de sobreposição
+    var allTimed = [];
 
-    // Outlook timed
     outlook.filter(function(e){ return !e.isAllDay && meudiaGetDT(e.start); }).forEach(function(e){
       var st = meudiaEventBRTTime(meudiaGetDT(e.start));
       var et = meudiaGetDT(e.end) ? meudiaEventBRTTime(meudiaGetDT(e.end)) : '';
       if (!st) return;
-      var parts = st.split(':'); var sh = +parts[0], sm = +parts[1];
+      var sp = st.split(':'); var sh = +sp[0], sm = +sp[1];
+      var startMins = sh * 60 + sm;
+      var durationMins = 60;
+      if (et) { var ep = et.split(':'); durationMins = Math.max(30, +ep[0]*60 + +ep[1] - startMins); }
+      var top = (startMins - START_HOUR * 60) / 60 * HOUR_H;
+      if (top < 0 || top >= TOTAL_H) return;
+      var height = Math.max(HOUR_H * 0.6, Math.min(durationMins / 60 * HOUR_H, TOTAL_H - top));
+      allTimed.push({type:'outlook', ev:e, startMins:startMins, endMins:startMins+durationMins, top:top, height:height, _col:0, _numCols:1,
+        st:st, et:et, subj:esc(e.subject||'Reunião')});
+    });
+
+    personal.filter(function(e){ return !!e.time; }).forEach(function(e){
+      var sp = e.time.split(':'); var sh = +sp[0], sm = +(sp[1]||0);
       var startMins = sh * 60 + sm;
       var top = (startMins - START_HOUR * 60) / 60 * HOUR_H;
       if (top < 0 || top >= TOTAL_H) return;
       var durationMins = 60;
-      if (et) { var ep = et.split(':'); durationMins = Math.max(30, +ep[0]*60 + +ep[1] - startMins); }
-      var height = Math.max(26, Math.min(durationMins / 60 * HOUR_H, TOTAL_H - top));
-      var subj = esc(e.subject || 'Reuniao');
-      var timeLabel = st + (et ? '–' + et : '');
-      evHtml += '<div class="meudia-tl-ev outlook" style="top:' + top + 'px;height:' + height + 'px;"'
-        + ' onclick="window.open(\'' + (e.webLink||'#') + '\',\'_blank\')" title="' + subj + '">'
-        + '<div class="meudia-tl-ev-time">' + timeLabel + '</div>'
-        + '<div class="meudia-tl-ev-title">' + subj + '</div>'
-        + '</div>';
+      var height = Math.max(HOUR_H * 0.75, Math.min(durationMins / 60 * HOUR_H, TOTAL_H - top));
+      allTimed.push({type:'personal', ev:e, startMins:startMins, endMins:startMins+durationMins, top:top, height:height, _col:0, _numCols:1});
     });
 
-    // Personal timed tasks
-    personal.filter(function(e){ return !!e.time; }).forEach(function(e){
-      var parts = e.time.split(':'); var sh = +parts[0], sm = +(parts[1]||0);
-      var top = (sh * 60 + sm - START_HOUR * 60) / 60 * HOUR_H;
-      if (top < 0 || top >= TOTAL_H) return;
-      var title = esc(e.title);
-      evHtml += '<div class="meudia-tl-ev personal' + (e.done?' done':'') + '" style="top:' + top + 'px;height:28px;"'
-        + ' draggable="true"'
-        + ' ondragstart="meudiaDragStart(\'' + e.id + '\',event)"'
-        + ' ondragend="meudiaDragEnd(event)"'
-        + ' onclick="meudiaOpenEdit(\'' + e.id + '\')" title="' + title + '">'
-        + '<div class="meudia-tl-ev-time">' + e.time + '</div>'
-        + '<div class="meudia-tl-ev-title">' + title + '</div>'
-        + '</div>';
+    layoutMeuDiaEvents(allTimed);
+
+    // Renderizar eventos com posicionamento calculado
+    var evHtml = '';
+    var GAP = 2;
+    allTimed.forEach(function(item) {
+      var pctW = 100 / item._numCols;
+      var leftPct = item._col * pctW;
+      var posStyle = 'left:calc(' + leftPct.toFixed(1) + '% + ' + GAP + 'px);width:calc(' + pctW.toFixed(1) + '% - ' + (GAP*2+1) + 'px);';
+
+      if (item.type === 'outlook') {
+        var timeLabel = item.st + (item.et ? '\u2013' + item.et : '');
+        evHtml += '<div class="meudia-tl-ev outlook" style="top:' + item.top + 'px;height:' + item.height + 'px;' + posStyle + '"'
+          + ' onclick="window.open(\'' + (item.ev.webLink||'#') + '\',\'_blank\')" title="' + item.subj + '">'
+          + '<div class="meudia-tl-ev-time">' + timeLabel + '</div>'
+          + '<div class="meudia-tl-ev-title">' + item.subj + '</div>'
+          + '</div>';
+      } else {
+        var ev = item.ev;
+        var title = esc(ev.title);
+        evHtml += '<div class="meudia-tl-ev personal' + (ev.done?' done':'') + '" style="top:' + item.top + 'px;height:' + item.height + 'px;' + posStyle + '"'
+          + ' draggable="true"'
+          + ' ondragstart="meudiaDragStart(\'' + ev.id + '\',event)"'
+          + ' ondragend="meudiaDragEnd(event)"'
+          + ' onclick="meudiaOpenEdit(\'' + ev.id + '\')" title="' + title + '">'
+          + '<div class="meudia-tl-ev-time">' + ev.time + '</div>'
+          + '<div class="meudia-tl-ev-title">' + title + '</div>'
+          + '</div>';
+      }
     });
 
-    // Hour & half-hour lines
+    // Linhas de hora
     var hLines = '';
     for (var h = START_HOUR; h < END_HOUR; h++) {
       hLines += '<div class="meudia-tl-hline" style="top:' + ((h - START_HOUR) * HOUR_H) + 'px;"></div>';
@@ -4157,14 +4208,13 @@ function renderMeuDiaWeekView() {
       + hLines + evHtml + '</div>';
   }
 
-  // Time labels
+  // Labels de hora
   var timeLabels = '';
   for (var h = START_HOUR; h <= END_HOUR; h++) {
-    var top = (h - START_HOUR) * HOUR_H;
-    timeLabels += '<div class="meudia-tl-tlabel" style="top:' + top + 'px;">' + (h < 10 ? '0' : '') + h + ':00</div>';
+    timeLabels += '<div class="meudia-tl-tlabel" style="top:' + ((h - START_HOUR) * HOUR_H) + 'px;">' + (h < 10 ? '0' : '') + h + ':00</div>';
   }
 
-  // Current time red line
+  // Linha do horário atual
   var nowLine = '';
   try {
     var now = new Date(new Date().toLocaleString('en-US', {timeZone:'America/Sao_Paulo'}));
