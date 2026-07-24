@@ -2267,7 +2267,7 @@ document.getElementById("mp-task-input").addEventListener("keydown",e=>{if(e.key
   setInterval(function() {
     // Não atualiza se houver modal aberto (evita interromper o usuário)
     const modalAberto = document.querySelector('.modal-overlay[style*="flex"]');
-    if (!modalAberto) loadFromSharePoint();
+    if (!modalAberto && !S.comprasModal && !S.meudiaModal) loadFromSharePoint();
   }, 30000);
 })();
 
@@ -2967,35 +2967,38 @@ function renderComprasDashboard(bp) {
       </div>
     </div>`).join('');
 
-  const urgBp={Alta:0,Média:0,Baixa:0};
-  bp.necessidade.forEach(p=>{urgBp[p.urgencia]=(urgBp[p.urgencia]||0)+1;});
-  const urgColors={Alta:'#C0392B',Média:'#E67E22',Baixa:'#27AE60'};
-  const urgBadges=Object.entries(urgBp).filter(([,n])=>n>0)
-    .map(([u,n])=>`<span style="background:${urgColors[u]};color:#fff;border-radius:4px;padding:2px 10px;font-size:11px;font-weight:700;">${u}: ${n}</span>`).join(' ');
+  const altaItems=bp.necessidade.filter(p=>p.urgencia==='Alta');
+  const urgBadges=altaItems.length
+    ? `<span style="background:#C0392B;color:#fff;border-radius:4px;padding:2px 10px;font-size:11px;font-weight:700;">Alta: ${altaItems.length}</span>`
+    : '';
 
-  // Proximas entregas
-  const proximas=bp.caminho.filter(p=>p.dataEntregaPrev).sort((a,b)=>a.dataEntregaPrev.localeCompare(b.dataEntregaPrev)).slice(0,3);
+  // Proximas entregas (somente próximos 3 dias)
+  const _hoje3=new Date(); _hoje3.setHours(0,0,0,0);
+  const _em3=new Date(_hoje3); _em3.setDate(_em3.getDate()+3); _em3.setHours(23,59,59,999);
+  const proximas=bp.caminho.filter(p=>p.dataEntregaPrev).filter(p=>{
+    const d=new Date(p.dataEntregaPrev+'T12:00:00');
+    return d>=_hoje3 && d<=_em3;
+  }).sort((a,b)=>a.dataEntregaPrev.localeCompare(b.dataEntregaPrev));
   const entregasHtml=proximas.length?proximas.map(p=>{
     const d=new Date(p.dataEntregaPrev+'T12:00:00');
-    const hoje=new Date(); hoje.setHours(0,0,0,0);
-    const diff=Math.round((d-hoje)/86400000);
-    const cor=diff<0?'#C0392B':diff<=3?'#E67E22':'#27AE60';
-    const label=diff<0?`${Math.abs(diff)}d atrasado`:diff===0?'hoje':diff===1?'amanhã':`${diff}d`;
+    const diff=Math.round((d-_hoje3)/86400000);
+    const cor=diff<=1?'#E67E22':'#27AE60';
+    const label=diff===0?'hoje':diff===1?'amanhã':`em ${diff}d`;
     return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f0eee8;">
       <span style="color:${cor};font-weight:700;font-size:11px;min-width:60px;">${label}</span>
       <span style="font-size:12px;color:#1a1a3e;flex:1;">${p.equipamento} <span style="color:#7A9BB5;">· ${p.loja||'—'}</span></span>
     </div>`;
-  }).join(''):'<div style="font-size:12px;color:#B0C8D8;padding:8px 0;">Nenhuma entrega prevista.</div>';
+  }).join(''):'<div style="font-size:12px;color:#B0C8D8;padding:8px 0;">Nenhuma entrega nos próximos 3 dias.</div>';
 
   return `<div style="padding:20px 28px 0;">
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-bottom:16px;">${cards}</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
       <div style="background:#fff;border-radius:10px;border:1.5px solid #dddce8;padding:16px;">
         <div style="font-size:11px;font-weight:700;color:#7A9BB5;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">Urgência em Aberto</div>
-        ${urgBadges||'<span style="color:#B0C8D8;font-size:12px;">Sem necessidades pendentes</span>'}
-        ${bp.necessidade.length>0?`<div style="margin-top:12px;border-top:1px solid #f0eee8;padding-top:10px;">
-          ${bp.necessidade.slice(0,4).map(p=>`<div style="font-size:12px;color:#1a1a3e;padding:3px 0;">${p.equipamento} <span style="color:#7A9BB5;">· ${p.usuarioSetor||'—'}</span></div>`).join('')}
-          ${bp.necessidade.length>4?`<div style="font-size:11px;color:#8393ff;margin-top:4px;">+${bp.necessidade.length-4} mais</div>`:''}
+        ${urgBadges||'<span style="color:#B0C8D8;font-size:12px;">Nenhuma necessidade urgente.</span>'}
+        ${altaItems.length>0?`<div style="margin-top:12px;border-top:1px solid #f0eee8;padding-top:10px;">
+          ${altaItems.slice(0,4).map(p=>`<div style="font-size:12px;color:#1a1a3e;padding:3px 0;">${p.equipamento} <span style="color:#7A9BB5;">· ${p.usuarioSetor||'—'}</span></div>`).join('')}
+          ${altaItems.length>4?`<div style="font-size:11px;color:#8393ff;margin-top:4px;">+${altaItems.length-4} mais</div>`:''}
         </div>`:''}
       </div>
       <div style="background:#fff;border-radius:10px;border:1.5px solid #dddce8;padding:16px;">
